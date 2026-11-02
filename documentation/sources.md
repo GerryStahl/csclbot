@@ -6,11 +6,11 @@ csclbot is built on three earlier projects. This repository holds only what it n
 
 | Project | Repository | What csclbot uses | Commit when used |
 |---|---|---|---|
-| ijCSCL anniversary analysis | [GerryStahl/anniversary](https://github.com/GerryStahl/anniversary) | article records (titles, authors, volume/issue, DOI, 50–60-word Haiku summaries, codes, clusters); the trends dataset | `af10f5f` (24 Aug 2026) **plus uncommitted changes** (see below) |
+| ijCSCL anniversary analysis | [GerryStahl/anniversary](https://github.com/GerryStahl/anniversary) | article records (titles, authors, volume/issue, DOI, 50–60-word Haiku summaries, codes, clusters); the trends dataset | `9eb4059` (2 Nov 2026) |
 | E-Library (22 books, 337 chapters) | [GerryStahl/E-Library](https://github.com/GerryStahl/E-Library) | chapter inventory and recorded references (from `cache/elibrary_cache.json`), volume PDFs for page ranges | `5b2b38f` (28 Mar 2026) |
 | Sculpture | [GerryStahl/Sculpture](https://github.com/GerryStahl/Sculpture) | not used by csclbot; listed as a related project only | – |
 
-The Anniversary files used here were taken from the working copy, which is ahead of the pushed commit `af10f5f`: the trends dataset (with the `src/trend_filters.py` change) and `ijcscl.json` were modified after that commit. Until those changes are pushed, the SHA-256 values below identify the exact inputs.
+The three copied files below are identical to the versions in Anniversary commit `9eb4059`; their SHA-256 values identify them exactly.
 
 ## Copied inputs (`data/inputs/`)
 

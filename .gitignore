@@ -8,6 +8,12 @@ __pycache__/
 # Copyrighted article text and anything derived from it stays local
 data/private/
 data/raw/
+data/raw */
+
+# Journal-article PDFs are Springer's: never commit. Only our own figures are allowed.
+*.pdf
+*.PDF
+!reports/figures/*.pdf
 
 # Personal reference-library export, not part of the repo
 reports/EndNote all references.docx

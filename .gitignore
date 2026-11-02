@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.azure/
+
+# Copyrighted article text and anything derived from it stays local
+data/private/
+data/raw/
+
+# Personal reference-library export, not part of the repo
+reports/EndNote all references.docx

@@ -1,0 +1,4 @@
+# Only needed to regenerate the anniversary-paper figure/table (src/era_comparison.py) and draft
+matplotlib>=3.9
+python-docx>=1.1
+scipy>=1.13

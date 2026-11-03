@@ -30,6 +30,20 @@ Eras: Stahl and Hesse 2006–2015 (194 articles), Ludvigsen 2016–2019 (69), Ro
 - Era differences are largest for pedagogy, method and semantic cluster (permutation p = .023, .036, .041), but q = .11 for all three after correction over the eight fields. They are described as suggestive.
 - Of the 54 articles of 2023–2025, 6 carry an AI label and 2 are about generative AI.
 
+## Full-text keyword scan
+
+`src/keyword_scan.py` counts context terms in the full text of the 371 articles, reference lists excluded. The full text comes from `../anniversary/data/processed/ijcscl.pkl` (local, git-ignored, never copied here); only counts are saved, in `reports/fulltext_keyword_scan.csv`.
+
+| Term group | Articles mentioning it | 3+ mentions | 10+ mentions |
+|---|---|---|---|
+| pandemic (covid, coronavirus, pandemic, emergency remote) | 19 | 9 | 0 |
+| climate (climate change/crisis/emergency, global warming, …) | 13 | 2 | 1 |
+| sustainability / environmental issues | 20 (18 not counted under climate) | 2 | 0 |
+| social media (social media, Facebook, Twitter, …) | 45 | 20 | 5 |
+| generative AI (ChatGPT, LLM, GPT-3/4, …) | 4 | 2 | 2 |
+
+The pandemic is mentioned in no article before 2020 and in 5 of the 54 articles of 2020–2022. Keyword counts do not show how a term is used; eight sampled contexts per term were read (pandemic hits were data-collection settings, climate hits examples of discussion topics). The earlier counts from the 50–60-word summaries (0 pandemic, 4 climate, 4 social media) understated every term.
+
 ## Cluster labels
 
 The cluster numbers are arbitrary K-means ids; the names were interpreted by Gerry from titles and summaries: 0 collaborative knowledge building and assessment; 1 teacher support and orchestration; 2 collaboration scripts and learner regulation; 3 online discourse and argumentation; 4 CSCL field and foundations; 5 embodied and immersive collaboration; 6 collaborative mathematics learning.

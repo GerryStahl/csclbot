@@ -1,0 +1,9 @@
+anthropic==0.84.0
+bm25s==0.3.2
+gradio==6.9.0
+maxminddb>=2.6
+numpy==2.4.2
+PyStemmer==3.0.0
+sentence-transformers==5.2.3
+transformers==5.3.0
+# torch is installed separately in the Dockerfile from the CPU-only wheel index (about 1 GB smaller)

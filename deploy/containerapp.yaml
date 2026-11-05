@@ -1,0 +1,63 @@
+# DRAFT template, rendered by deploy/deploy.sh with envsubst; values come from the environment.
+name: ${APP}
+location: ${LOCATION}
+properties:
+  managedEnvironmentId: ${ENV_ID}
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 7860
+      transport: auto
+      allowInsecure: false
+    registries:
+      - server: ${ACR_SERVER}
+        username: ${ACR_USER}
+        passwordSecretRef: acr-password
+    secrets:
+      - name: acr-password
+        value: ${ACR_PASSWORD}
+      - name: anthropic-api-key
+        value: ${ANTHROPIC_API_KEY}
+      - name: hash-salt
+        value: ${HASH_SALT}
+  template:
+    containers:
+      - name: csclbot
+        image: ${IMAGE}
+        resources:
+          cpu: 1.0
+          memory: 2Gi
+        env:
+          - name: ANTHROPIC_API_KEY
+            secretRef: anthropic-api-key
+          - name: CSCLBOT_HASH_SALT
+            secretRef: hash-salt
+          - name: CSCLBOT_DAILY_SPEND_CAP_USD
+            value: "5"
+          - name: CSCLBOT_HOURLY_LIMIT
+            value: "8"
+          - name: CSCLBOT_DAILY_LIMIT
+            value: "30"
+          - name: CSCLBOT_PROXY_HOPS
+            value: "1"
+        volumeMounts:
+          - volumeName: state
+            mountPath: /mnt/state
+        probes:
+          - type: Startup
+            httpGet:
+              path: /
+              port: 7860
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 18
+    scale:
+      # exactly one replica at most: the rate limits and spend counter are kept per process
+      minReplicas: ${MIN_REPLICAS}
+      maxReplicas: 1
+    volumes:
+      - name: state
+        storageType: AzureFile
+        storageName: state
+        mountOptions: uid=1000,gid=1000,dir_mode=0777,file_mode=0666

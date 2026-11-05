@@ -56,11 +56,18 @@ limiter = Limiter()
 searcher: Searcher | None = None
 
 
+PROXY_HOPS = int(os.environ.get("CSCLBOT_PROXY_HOPS", "1"))  # trusted proxies in front of the app (Azure ingress = 1)
+
+
 def client_ip(request: gr.Request | None) -> str:
+    """Visitor address. Each proxy appends the address it saw to X-Forwarded-For, so the entry that
+    the trusted proxy added is the one counted from the right; earlier entries can be forged by the visitor."""
     if request is None:
         return "127.0.0.1"
-    forwarded = request.headers.get("x-forwarded-for")
-    return forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
+    forwarded = [part.strip() for part in request.headers.get("x-forwarded-for", "").split(",") if part.strip()]
+    if forwarded:
+        return forwarded[-PROXY_HOPS] if len(forwarded) >= PROXY_HOPS else forwarded[0]
+    return request.client.host if request.client else "unknown"
 
 
 def passages_markdown(passages: list[dict]) -> str:

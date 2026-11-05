@@ -1,0 +1,27 @@
+.git
+.github
+.vscode
+.venv
+__pycache__
+*.pyc
+.DS_Store
+.env
+*.pdf
+
+# not needed at run time
+reports
+documentation
+data/raw
+data/inputs
+data/logs
+data/usage.json
+src/build_*.py
+src/fetch_*.py
+src/locate_*.py
+src/era_comparison.py
+src/trend_tests.py
+src/keyword_scan.py
+src/sample_*.py
+src/usage_report.py
+src/anniversary_corpus.py
+src/apa.py

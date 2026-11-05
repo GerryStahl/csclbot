@@ -140,6 +140,11 @@ def references_block(cited: list[dict], suffix: dict[str, str]) -> str:
     return "\n".join(lines)
 
 
+def strip_headings(text: str) -> str:
+    """The prompt asks for no headings; drop the '#' markers if the model adds one anyway."""
+    return re.sub(r"(?m)^#{1,6}\s+", "", text)
+
+
 def norm_quote(text: str) -> str:
     text = text.replace("\u2019", "'").replace("\u2018", "'").replace("\u201c", '"').replace("\u201d", '"')
     return re.sub(r"[^a-z0-9']+", " ", text.lower()).strip()
@@ -179,7 +184,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
         system=SYSTEM,
         messages=[{"role": "user", "content": f"Sources:\n\n{format_sources(sources)}\n\nQuestion: {question}"}],
     )
-    raw = "".join(b.text for b in msg.content if b.type == "text")
+    raw = strip_headings("".join(b.text for b in msg.content if b.type == "text"))
     usage = [msg.usage.input_tokens, msg.usage.output_tokens]
     problems = check_quotes(raw, sources)
     if problems:  # one revision pass: fix or remove the quotations that cannot be verified
@@ -195,7 +200,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
                  f"{QUOTE_LIMIT_WORDS} words). Return only the revised answer."},
             ],
         )
-        raw = "".join(b.text for b in retry.content if b.type == "text")
+        raw = strip_headings("".join(b.text for b in retry.content if b.type == "text"))
         usage = [usage[0] + retry.usage.input_tokens, usage[1] + retry.usage.output_tokens]
         problems = check_quotes(raw, sources)
     text, cited, suffix = link_citations(raw, sources)

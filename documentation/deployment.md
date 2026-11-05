@@ -23,6 +23,11 @@ One container, built in Azure from the [Dockerfile](../Dockerfile), serving the 
 
 Deleting everything later is one command: `az group delete -n rg-csclbot`.
 
+## Decisions made (5 Nov 2026)
+
+- Region **eastus**; **scale to zero** (`MIN_REPLICAS=0`); country from **MaxMind GeoLite2** (Gerry registers a free account and saves the database as `data/GeoLite2-Country.mmdb`).
+- Still open: subscription, custom web address, and the backstop spending limit at Anthropic (items 1, 4 and 5 below).
+
 ## Decisions needed from Gerry
 
 1. **Subscription and region.** I cannot see your Azure account. Install the Azure CLI (`brew install azure-cli`), run `az login`, and tell me which subscription to use. The draft assumes `eastus`.

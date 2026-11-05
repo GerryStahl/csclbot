@@ -1,6 +1,11 @@
 # Deployment plan: The CSCL Bot on Azure Container Apps
 
-**Status: draft for review. Nothing has been created in Azure, and the Dockerfile and `deploy/` scripts have not been run** (the development machine has neither Docker nor the Azure CLI). The app itself has been tested from a copy containing only the files the image will hold.
+**Status: deployed on 5 Nov 2026** at https://csclbot.bravemeadow-0908f7d2.eastus.azurecontainerapps.io (subscription "Azure subscription 1", resource group `rg-csclbot`, region eastus, scale to zero, one replica at most). Registry `acrcsclbotgs7k2`, storage account `stcsclbotgs7k2` (file share `state`), environment `cae-csclbot`, app `csclbot`. The image is built in the cloud and the country in the log comes from the bundled GeoLite2 database. The custom address csclbot.gerrystahl.net is the next step; it needs two DNS records:
+
+| Type | Name | Value |
+|---|---|---|
+| CNAME | `csclbot` | `csclbot.bravemeadow-0908f7d2.eastus.azurecontainerapps.io` |
+| TXT | `asuid.csclbot` | `F4608CE6E46A699A07B740A8E15831B22433972CA49E5350003F8D0D401DBB27` |
 
 ## What will run
 

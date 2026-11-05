@@ -27,14 +27,18 @@ MIN_REPLICAS="${MIN_REPLICAS:-0}"   # 0 = scale to zero (cheap, first visitor wa
 
 az account set --subscription "$SUBSCRIPTION"
 az extension add --name containerapp --upgrade -y
-az provider register --namespace Microsoft.App --wait
-az provider register --namespace Microsoft.OperationalInsights --wait
+# a new subscription must register each service once
+for ns in Microsoft.App Microsoft.OperationalInsights Microsoft.ContainerRegistry Microsoft.Storage; do
+  az provider register --namespace "$ns" --wait
+done
 
 az group create -n "$RG" -l "$LOCATION"
 
 # 1. Registry and cloud image build (no local Docker needed)
 az acr create -g "$RG" -n "$ACR" --sku Basic --admin-enabled true
-az acr build -r "$ACR" -t "csclbot:$TAG" .
+if [ -z "${SKIP_BUILD:-}" ]; then   # SKIP_BUILD=1 TAG=<existing tag> reuses an image that is already built
+  az acr build -r "$ACR" -t "csclbot:$TAG" .
+fi
 
 # 2. Logging, environment, persistent storage for the usage log and spend counter
 az monitor log-analytics workspace create -g "$RG" -n "$LAW" -l "$LOCATION"
@@ -44,7 +48,7 @@ az containerapp env create -g "$RG" -n "$ENV_NAME" -l "$LOCATION" --logs-workspa
 
 az storage account create -g "$RG" -n "$SA" -l "$LOCATION" --sku Standard_LRS --allow-blob-public-access false
 SA_KEY=$(az storage account keys list -g "$RG" -n "$SA" --query "[0].value" -o tsv)
-az storage share-rm create --storage-account "$SA" --name state --quota 5
+az storage share-rm create -g "$RG" --storage-account "$SA" --name state --quota 5
 az containerapp env storage set -g "$RG" -n "$ENV_NAME" --storage-name state \
   --azure-file-account-name "$SA" --azure-file-account-key "$SA_KEY" --azure-file-share-name state --access-mode ReadWrite
 

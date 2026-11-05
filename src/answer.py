@@ -169,7 +169,7 @@ def check_quotes(raw_answer: str, sources: list[dict]) -> list[str]:
 
 def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: int = 5, articles: int = 4) -> dict:
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        sys.exit("ANTHROPIC_API_KEY is not set. Open a new terminal (it is exported in ~/.zshrc) and try again.")
+        raise RuntimeError("ANTHROPIC_API_KEY is not set. Export it in your shell profile and open a new terminal.")
     results = searcher.search(question, books=books, articles=articles, per_doc=2)
     sources = build_sources(results)
     client = anthropic.Anthropic()
@@ -210,6 +210,9 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
         "usage": {"input": usage[0], "output": usage[1]},
         "stop_reason": msg.stop_reason,
         "quote_problems": problems,
+        "passages_used": [
+            {"cite": f"{s['cite']}", "reference": s["doc"]["reference"], "kind": s["kind"], "text": s["text"]} for s in cited
+        ],
     }
 
 
@@ -225,7 +228,10 @@ def main() -> None:
     parser.add_argument("question")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Claude model id (default: Haiku 4.5)")
     args = parser.parse_args()
-    print(render(ask(args.question, Searcher(), model=args.model)))
+    try:
+        print(render(ask(args.question, Searcher(), model=args.model)))
+    except RuntimeError as exc:
+        sys.exit(str(exc))
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ Public RAG question-answering interface ("Ask Gerry's Library") over Gerry Stahl
 
 The repository also documents the analyses for Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
 
-**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer works from the command line ([sample answers](reports/sample_answers.md)); the Gradio page and hosting are not built yet.
+**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer works from the command line ([sample answers](reports/sample_answers.md)); the Gradio page works locally (`src/app.py`); hosting is not set up yet.
 
 ## Source projects (read-only archives)
 
@@ -46,6 +46,14 @@ export ANTHROPIC_API_KEY=...      # in your shell profile, never in the repo
 ```
 
 Cost with Haiku is roughly 4,000 input and 450 output tokens per question (check current Anthropic pricing).
+
+## Web page
+
+```bash
+.venv/bin/python src/app.py        # http://127.0.0.1:7860 (set PORT to change); needs ANTHROPIC_API_KEY
+```
+
+`src/app.py` is a Gradio page (question box, examples, answer with references, a collapsible panel of the passages used). Claude only. `src/limits.py` limits each visitor to 8 questions per hour and 30 per day and stops answering when the day's estimated spend reaches the cap ($5 by default); the spend total is kept in `data/usage.json` (git-ignored). Override with `CSCLBOT_HOURLY_LIMIT`, `CSCLBOT_DAILY_LIMIT`, `CSCLBOT_DAILY_SPEND_CAP_USD`, and the per-million-token prices with `CSCLBOT_INPUT_USD_PER_MTOK` and `CSCLBOT_OUTPUT_USD_PER_MTOK` (defaults are for Haiku 4.5; check Anthropic's current prices). Questions are not logged.
 
 ## Setup
 

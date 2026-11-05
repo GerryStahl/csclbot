@@ -4,7 +4,7 @@ Public RAG question-answering interface ("Ask Gerry's Library") over Gerry Stahl
 
 The repository also documents the analyses for Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
 
-**Status:** reference data and paper analyses are done; the hosted app is not built yet.
+**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer and the hosted app are not built yet.
 
 ## Source projects (read-only archives)
 
@@ -22,6 +22,18 @@ See [documentation/sources.md](documentation/sources.md) for exactly which files
 - `src/` — reference pipeline, paper analyses, and (later) the hosted app
 - `documentation/` — [sources](documentation/sources.md), [paper analyses](documentation/paper_analyses.md), [reference schema](documentation/references_schema.md)
 - `reports/` — `references.csv`, era-comparison and trend-test tables, `figures/`, and the paper draft
+
+## Search (retrieval only)
+
+One index, one embedding model (`e5-base-v2`, 768-dim): 17,441 e-library chunks and 335 chapter summaries (vectors reused from E-Library) plus 463 ijCSCL article summaries (embedded here; no article text). Dense and BM25 rankings are fused, then grouped into book chapters and journal articles. Every result carries its APA reference, an in-text citation with page(s), and the linked references (journal article ↔ book-chapter reprint, original publication), so users can choose a source they can access.
+
+```bash
+.venv/bin/python src/build_index.py                       # needs ../elibrary; writes data/index/ (git-ignored)
+.venv/bin/python src/search.py "How is group cognition different from individual cognition?"
+.venv/bin/python src/sample_results.py                    # 15 test questions -> reports/sample_results.md
+```
+
+Book pages are located by matching each chunk's text in the volume PDF (the page numbers in the old index drift by 1–3 pages). About 1% of chunks could not be matched and take the previous chunk's page. Article citations give the whole article's page range, because articles are indexed by summary only.
 
 ## Setup
 

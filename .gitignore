@@ -17,3 +17,6 @@ data/raw */
 
 # Personal reference-library export, not part of the repo
 reports/EndNote all references.docx
+
+# Search index (rebuildable by src/build_index.py)
+data/index/

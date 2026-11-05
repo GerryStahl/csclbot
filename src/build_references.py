@@ -216,7 +216,8 @@ def chapter_authors(ch: dict, parsed: dict | None) -> list[dict]:
     if parsed and parsed.get("parse_ok") and parsed.get("authors"):
         return parsed["authors"]
     text = clean_text(ch["chapter_author"])
-    return parse_authors(text) if re.search(r",\s*[A-ZÇ]\.", text) else authors_from_ampersand_string(text)
+    # "Stahl, G., & Hesse, F." is APA order; "G. Stahl, T. Koschmann & D. Suthers" is initials first
+    return parse_authors(text) if re.match(r"^[^,.]{2,},\s*[A-ZÇ]\.", text) else authors_from_ampersand_string(text)
 
 
 def find_ijcscl_match(parsed: dict | None, chapter_title: str, raw_title: str, book_number: int, index: dict) -> dict | None:

@@ -1,6 +1,6 @@
 {
  "schema_version": "1.0",
- "generated": "2026-11-02",
+ "generated": "2026-11-05",
  "style": "APA 7",
  "notes": "See documentation/references_schema.md. 'apa' is plain text, 'apa_md' marks italics with *asterisks*.",
  "books": [
@@ -33772,12 +33772,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "R. Medina",
+     "family": "Medina",
+     "given": "R.",
+     "initials": "R."
+    },
+    {
+     "family": "Suthers",
      "given": "D.",
      "initials": "D."
     },
     {
-     "literal": "Suthers & R. Vatrapu"
+     "family": "Vatrapu",
+     "given": "R.",
+     "initials": "R."
     }
    ],
    "year": 2026,
@@ -33805,7 +33812,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/svmt",
-   "apa_md": "R. Medina, D., & Suthers & R. Vatrapu (2026). Representational practices in VMT. In G. Stahl (Ed.), *Studying Virtual Math Teams* (pp. 221–244). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
+   "apa_md": "Medina, R., Suthers, D., & Vatrapu, R. (2026). Representational practices in VMT. In G. Stahl (Ed.), *Studying Virtual Math Teams* (pp. 221–244). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
    "corpus": {
     "project": "elibrary",
     "book_number": 4,
@@ -33818,8 +33825,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "R. Medina, D., & Suthers & R. Vatrapu (2026). Representational practices in VMT. In G. Stahl (Ed.), Studying Virtual Math Teams (pp. 221–244). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
-   "cite_short": "R. Medina & Suthers & R. Vatrapu, 2026",
+   "apa": "Medina, R., Suthers, D., & Vatrapu, R. (2026). Representational practices in VMT. In G. Stahl (Ed.), Studying Virtual Math Teams (pp. 221–244). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
+   "cite_short": "Medina et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -34566,17 +34573,29 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "Y. Cui",
+     "family": "Cui",
+     "given": "Y.",
+     "initials": "Y."
+    },
+    {
+     "family": "Kumar",
      "given": "R.",
      "initials": "R."
     },
     {
-     "family": "S. Chaudhuri",
+     "family": "Chaudhuri",
+     "given": "S.",
+     "initials": "S."
+    },
+    {
+     "family": "Gweon",
      "given": "G.",
      "initials": "G."
     },
     {
-     "literal": "Gweon & C. Rosé"
+     "family": "Rosé",
+     "given": "C.",
+     "initials": "C."
     }
    ],
    "year": 2026,
@@ -34604,7 +34623,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/svmt",
-   "apa_md": "Y. Cui, R., S. Chaudhuri, G., & Gweon & C. Rosé (2026). Helping Agents in VMT. In G. Stahl (Ed.), *Studying Virtual Math Teams* (pp. 383–405). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
+   "apa_md": "Cui, Y., Kumar, R., Chaudhuri, S., Gweon, G., & Rosé, C. (2026). Helping Agents in VMT. In G. Stahl (Ed.), *Studying Virtual Math Teams* (pp. 383–405). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
    "corpus": {
     "project": "elibrary",
     "book_number": 4,
@@ -34617,8 +34636,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "Y. Cui, R., S. Chaudhuri, G., & Gweon & C. Rosé (2026). Helping Agents in VMT. In G. Stahl (Ed.), Studying Virtual Math Teams (pp. 383–405). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
-   "cite_short": "Y. Cui et al., 2026",
+   "apa": "Cui, Y., Kumar, R., Chaudhuri, S., Gweon, G., & Rosé, C. (2026). Helping Agents in VMT. In G. Stahl (Ed.), Studying Virtual Math Teams (pp. 383–405). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
+   "cite_short": "Cui et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -34686,12 +34705,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "M. Çakir",
+     "family": "Çakır",
+     "given": "M.",
+     "initials": "M."
+    },
+    {
+     "family": "Xhafa",
      "given": "F.",
      "initials": "F."
     },
     {
-     "literal": "Xhafa & N. Zhou"
+     "family": "Zhou",
+     "given": "N.",
+     "initials": "N."
     }
    ],
    "year": 2026,
@@ -34719,7 +34745,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/svmt",
-   "apa_md": "M. Çakir, F., & Xhafa & N. Zhou (2026). Thread-based Analysis of Patterns in VMT. In G. Stahl (Ed.), *Studying Virtual Math Teams* (pp. 409–422). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
+   "apa_md": "Çakır, M., Xhafa, F., & Zhou, N. (2026). Thread-based Analysis of Patterns in VMT. In G. Stahl (Ed.), *Studying Virtual Math Teams* (pp. 409–422). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
    "corpus": {
     "project": "elibrary",
     "book_number": 4,
@@ -34732,8 +34758,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "M. Çakir, F., & Xhafa & N. Zhou (2026). Thread-based Analysis of Patterns in VMT. In G. Stahl (Ed.), Studying Virtual Math Teams (pp. 409–422). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
-   "cite_short": "M. Çakir & Xhafa & N. Zhou, 2026",
+   "apa": "Çakır, M., Xhafa, F., & Zhou, N. (2026). Thread-based Analysis of Patterns in VMT. In G. Stahl (Ed.), Studying Virtual Math Teams (pp. 409–422). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/svmt",
+   "cite_short": "Çakır et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -47742,12 +47768,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "G. Stahl",
+     "family": "Stahl",
+     "given": "G.",
+     "initials": "G."
+    },
+    {
+     "family": "Koschmann",
      "given": "T.",
      "initials": "T."
     },
     {
-     "literal": "Koschmann & D. Suthers"
+     "family": "Suthers",
+     "given": "D.",
+     "initials": "D."
     }
    ],
    "year": 2026,
@@ -47775,7 +47808,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/global",
-   "apa_md": "G. Stahl, T., & Koschmann & D. Suthers (2026). English third edition (2020). In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 8–31). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "apa_md": "Stahl, G., Koschmann, T., & Suthers, D. (2026). English third edition (2020). In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 8–31). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
    "corpus": {
     "project": "elibrary",
     "book_number": 15,
@@ -47788,8 +47821,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "G. Stahl, T., & Koschmann & D. Suthers (2026). English third edition (2020). In G. Stahl (Ed.), Global Introduction to CSCL (pp. 8–31). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
-   "cite_short": "G. Stahl & Koschmann & D. Suthers, 2026",
+   "apa": "Stahl, G., Koschmann, T., & Suthers, D. (2026). English third edition (2020). In G. Stahl (Ed.), Global Introduction to CSCL (pp. 8–31). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "cite_short": "Stahl et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -47930,12 +47963,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "G. Stahl",
+     "family": "Stahl",
+     "given": "G.",
+     "initials": "G."
+    },
+    {
+     "family": "Koschmann",
      "given": "T.",
      "initials": "T."
     },
     {
-     "literal": "Koschmann & D. Suthers"
+     "family": "Suthers",
+     "given": "D.",
+     "initials": "D."
     }
    ],
    "year": 2026,
@@ -47963,7 +48003,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/global",
-   "apa_md": "G. Stahl, T., & Koschmann & D. Suthers (2026). Spanish Translation by Cesar Alberto & Collazos Ordoñez. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 51–71). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "apa_md": "Stahl, G., Koschmann, T., & Suthers, D. (2026). Spanish Translation by Cesar Alberto & Collazos Ordoñez. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 51–71). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
    "corpus": {
     "project": "elibrary",
     "book_number": 15,
@@ -47976,8 +48016,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "G. Stahl, T., & Koschmann & D. Suthers (2026). Spanish Translation by Cesar Alberto & Collazos Ordoñez. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 51–71). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
-   "cite_short": "G. Stahl & Koschmann & D. Suthers, 2026",
+   "apa": "Stahl, G., Koschmann, T., & Suthers, D. (2026). Spanish Translation by Cesar Alberto & Collazos Ordoñez. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 51–71). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "cite_short": "Stahl et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -48113,12 +48153,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "G. Stahl",
+     "family": "Stahl",
+     "given": "G.",
+     "initials": "G."
+    },
+    {
+     "family": "Koschmann",
      "given": "T.",
      "initials": "T."
     },
     {
-     "literal": "Koschmann & D. Suthers"
+     "family": "Suthers",
+     "given": "D.",
+     "initials": "D."
     }
    ],
    "year": 2026,
@@ -48146,7 +48193,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/global",
-   "apa_md": "G. Stahl, T., & Koschmann & D. Suthers (2026). Simplified Chinese Translation by Nan Zhou. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 92–111). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "apa_md": "Stahl, G., Koschmann, T., & Suthers, D. (2026). Simplified Chinese Translation by Nan Zhou. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 92–111). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
    "corpus": {
     "project": "elibrary",
     "book_number": 15,
@@ -48159,8 +48206,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "G. Stahl, T., & Koschmann & D. Suthers (2026). Simplified Chinese Translation by Nan Zhou. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 92–111). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
-   "cite_short": "G. Stahl & Koschmann & D. Suthers, 2026",
+   "apa": "Stahl, G., Koschmann, T., & Suthers, D. (2026). Simplified Chinese Translation by Nan Zhou. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 92–111). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "cite_short": "Stahl et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -48172,12 +48219,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "G. Stahl",
+     "family": "Stahl",
+     "given": "G.",
+     "initials": "G."
+    },
+    {
+     "family": "Koschmann",
      "given": "T.",
      "initials": "T."
     },
     {
-     "literal": "Koschmann & D. Suthers"
+     "family": "Suthers",
+     "given": "D.",
+     "initials": "D."
     }
    ],
    "year": 2026,
@@ -48205,7 +48259,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/global",
-   "apa_md": "G. Stahl, T., & Koschmann & D. Suthers (2026). Traditional Chinese Translation by Fei-Ching Chen. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 112–128). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "apa_md": "Stahl, G., Koschmann, T., & Suthers, D. (2026). Traditional Chinese Translation by Fei-Ching Chen. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 112–128). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
    "corpus": {
     "project": "elibrary",
     "book_number": 15,
@@ -48218,8 +48272,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "G. Stahl, T., & Koschmann & D. Suthers (2026). Traditional Chinese Translation by Fei-Ching Chen. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 112–128). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
-   "cite_short": "G. Stahl & Koschmann & D. Suthers, 2026",
+   "apa": "Stahl, G., Koschmann, T., & Suthers, D. (2026). Traditional Chinese Translation by Fei-Ching Chen. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 112–128). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "cite_short": "Stahl et al., 2026",
    "review": {
     "status": "ok",
     "issues": []
@@ -48355,12 +48409,19 @@
    "in_corpus": true,
    "authors": [
     {
-     "family": "G. Stahl",
+     "family": "Stahl",
+     "given": "G.",
+     "initials": "G."
+    },
+    {
+     "family": "Koschmann",
      "given": "T.",
      "initials": "T."
     },
     {
-     "literal": "Koschmann & D. Suthers"
+     "family": "Suthers",
+     "given": "D.",
+     "initials": "D."
     }
    ],
    "year": 2026,
@@ -48388,7 +48449,7 @@
    },
    "doi": null,
    "url": "https://gerrystahl.net/elibrary/global",
-   "apa_md": "G. Stahl, T., & Koschmann & D. Suthers (2026). German Translation by Martin Mühlpfordt. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 149–176). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "apa_md": "Stahl, G., Koschmann, T., & Suthers, D. (2026). German Translation by Martin Mühlpfordt. In G. Stahl (Ed.), *Global Introduction to CSCL* (pp. 149–176). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
    "corpus": {
     "project": "elibrary",
     "book_number": 15,
@@ -48401,8 +48462,8 @@
     "title": "elibrary chapter_title",
     "pages": "PDF scan (printed page = PDF page index + 1)"
    },
-   "apa": "G. Stahl, T., & Koschmann & D. Suthers (2026). German Translation by Martin Mühlpfordt. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 149–176). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
-   "cite_short": "G. Stahl & Koschmann & D. Suthers, 2026",
+   "apa": "Stahl, G., Koschmann, T., & Suthers, D. (2026). German Translation by Martin Mühlpfordt. In G. Stahl (Ed.), Global Introduction to CSCL (pp. 149–176). Gerry Stahl at Lulu. https://gerrystahl.net/elibrary/global",
+   "cite_short": "Stahl et al., 2026",
    "review": {
     "status": "ok",
     "issues": []

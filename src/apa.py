@@ -79,7 +79,7 @@ def split_display_name(name: str) -> dict:
 
 def authors_from_ampersand_string(text: str) -> list[dict]:
     """'Manu Kapur & Charles K. Kinzer' (or 'G. Stahl, T. Koschmann & D. Suthers')."""
-    parts = [p for p in re.split(r"\s*(?:&|;|,(?!\s*(?:Jr|Sr)))\s*", text or "") if p.strip()]
+    parts = [p for p in re.split(r"\s*(?:&|;|,(?!\s*(?:Jr|Sr))|\band\b)\s*", text or "") if p.strip()]
     return [split_display_name(p) for p in parts]
 
 

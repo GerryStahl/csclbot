@@ -4,7 +4,7 @@ Public RAG question-answering interface ("Ask Gerry's Library") over Gerry Stahl
 
 The repository also documents the analyses for Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
 
-**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer and the hosted app are not built yet.
+**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer works from the command line ([sample answers](reports/sample_answers.md)); the Gradio page and hosting are not built yet.
 
 ## Source projects (read-only archives)
 
@@ -34,6 +34,18 @@ One index, one embedding model (`e5-base-v2`, 768-dim): 17,441 e-library chunks 
 ```
 
 Book pages are located by matching each chunk's text in the volume PDF (the page numbers in the old index drift by 1–3 pages). About 1% of chunks could not be matched and take the previous chunk's page. Article citations give the whole article's page range, because articles are indexed by summary only.
+
+## Answers (Claude)
+
+`src/answer.py` retrieves the best passages (up to two per document), numbers them S1…Sn, and asks Claude (default `claude-haiku-4-5-20251001`) to answer from those sources only, tagging claims with `[S#]`. The program, not the model, turns each tag into an APA in-text citation with the page(s) of that passage (2026a/2026b when one author has several works in a year) and appends the full references of the sources actually cited, with their alternative sources. Journal articles are represented by short summaries only, so they are paraphrased, never quoted. Quotations are checked against the passages; one revision pass runs if any cannot be verified, and anything still unverified is flagged.
+
+```bash
+export ANTHROPIC_API_KEY=...      # in your shell profile, never in the repo
+.venv/bin/python src/answer.py "How is group cognition different from individual cognition?" [--model MODEL]
+.venv/bin/python src/sample_answers.py                     # 8 test questions -> reports/sample_answers.md
+```
+
+Cost with Haiku is roughly 4,000 input and 450 output tokens per question (check current Anthropic pricing).
 
 ## Setup
 

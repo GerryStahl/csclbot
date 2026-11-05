@@ -89,9 +89,15 @@ class Searcher:
             "type": doc["type"],
             "score": score,
             "cite": in_text(doc, pages),
+            "cite_short": doc["cite_short"],
+            "title": doc["title"],
             "reference": doc["apa"],
             "pages": pages,
             "snippets": snippets,
+            "passages": [
+                {"kind": item["kind"], "text": re.sub(r"\s+", " ", item["text"]).strip(), "cite": in_text(doc, cited_pages(doc, [item])), "pages": cited_pages(doc, [item])}
+                for _, item in hits[:per_doc]
+            ],
             "also": [
                 {"label": RELATION_LABELS[r["relation"]], "id": r["id"], "reference": self.refs[r["id"]]["apa"], "cite": in_text(self.refs[r["id"]], whole_pages(self.refs[r["id"]]))}
                 for r in doc["related"]

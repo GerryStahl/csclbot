@@ -4,7 +4,7 @@ Public RAG question-answering interface ("The CSCL Bot") over Gerry Stahl's writ
 
 The repository also documents the analyses for Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
 
-**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer works from the command line ([sample answers](reports/sample_answers.md)); the Gradio page works locally (`src/app.py`); hosting on Azure is drafted but not deployed ([deployment plan](documentation/deployment.md)).
+**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer works from the command line ([sample answers](reports/sample_answers.md)); the Gradio page works locally (`src/app.py`); **live at https://csclbot.gerrystahl.net** (Azure Container Apps; see the [deployment record](documentation/deployment.md)).
 
 ## Source projects (read-only archives)
 
@@ -20,7 +20,7 @@ See [documentation/sources.md](documentation/sources.md) for exactly which files
 - `data/references.json` — one APA reference with page numbers per citable document; [schema](documentation/references_schema.md)
 - `data/` — `data/private/` and `data/raw/` are git-ignored
 - `src/` — reference pipeline, paper analyses, and (later) the hosted app
-- `Dockerfile`, `deploy/` — draft Azure Container Apps deployment (not yet run)
+- `Dockerfile`, `deploy/` — Azure Container Apps deployment (`deploy.sh`, `containerapp.yaml`, `fetch_logs.sh`)
 - `documentation/` — [sources](documentation/sources.md), [paper analyses](documentation/paper_analyses.md), [reference schema](documentation/references_schema.md)
 - `reports/` — `references.csv`, era-comparison and trend-test tables, `figures/`, and the paper draft
 

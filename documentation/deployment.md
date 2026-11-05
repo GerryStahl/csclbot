@@ -1,6 +1,6 @@
 # Deployment plan: The CSCL Bot on Azure Container Apps
 
-**Status: deployed on 5 Nov 2026** at https://csclbot.bravemeadow-0908f7d2.eastus.azurecontainerapps.io (subscription "Azure subscription 1", resource group `rg-csclbot`, region eastus, scale to zero, one replica at most). Registry `acrcsclbotgs7k2`, storage account `stcsclbotgs7k2` (file share `state`), environment `cae-csclbot`, app `csclbot`. The image is built in the cloud and the country in the log comes from the bundled GeoLite2 database. The custom address csclbot.gerrystahl.net is the next step; it needs two DNS records:
+**Status: deployed on 5 Nov 2026** at https://csclbot.bravemeadow-0908f7d2.eastus.azurecontainerapps.io (subscription "Azure subscription 1", resource group `rg-csclbot`, region eastus, scale to zero, one replica at most). Registry `acrcsclbotgs7k2`, storage account `stcsclbotgs7k2` (file share `state`), environment `cae-csclbot`, app `csclbot`. The image is built in the cloud and the country in the log comes from the bundled GeoLite2 database. The public address is **https://csclbot.gerrystahl.net** (bound 5 Nov 2026; free Azure-managed certificate, issued by DigiCert/GeoTrust, valid to May 2027 and renewed automatically as long as the DNS records stay). DNS at DreamHost:
 
 | Type | Name | Value |
 |---|---|---|
@@ -69,6 +69,11 @@ The cloud app writes the Excel-readable log inside Azure, **not** into your proj
 ## Cost (to check, not a quote)
 
 Container Apps bills per second of CPU and memory with monthly free allowances, and a container that is scaled to zero costs almost nothing. An always-on 1 vCPU / 2 GiB container will cost more, on the order of tens of dollars a month. The registry (Basic), the storage account and log ingestion add a few dollars a month at this scale. Please check the Azure pricing calculator for your region before deciding on always-on. The Anthropic cost is separate: about a cent per question at Haiku's rates.
+
+## Verified on first deployment
+
+- The cloud build works (3.5 minutes), including the optional MaxMind copy line. A live question was answered in about 6 seconds; the usage log and spend counter persist on the Azure share; the country was recorded.
+- `deploy.sh` needed fixes on the first run: register the Container Registry and Storage providers, name the resource group when creating the share. `fetch_logs.sh` needed the storage key instead of OAuth.
 
 ## Not yet verified
 

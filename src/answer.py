@@ -206,6 +206,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
         "references": references_block(cited, suffix),
         "cited_docs": sorted({s["doc"]["id"] for s in cited}),
         "n_sources": len(sources),
+        "retrieved_docs": [r["id"] for r in results],
         "unknown_tags": unknown,
         "usage": {"input": usage[0], "output": usage[1]},
         "stop_reason": msg.stop_reason,

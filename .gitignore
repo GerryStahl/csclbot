@@ -21,3 +21,5 @@ reports/EndNote all references.docx
 # Search index (rebuildable by src/build_index.py)
 data/index/
 data/usage.json
+data/logs/
+data/GeoLite2-Country.mmdb

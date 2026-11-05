@@ -1,4 +1,4 @@
-"""Ask Gerry's Library: the csclbot web page (Gradio).
+"""The CSCL Bot: the csclbot web page (Gradio).
 
 Search (src/search.py) -> Claude answer with APA citations (src/answer.py), with a per-visitor rate
 limit and a daily spend cap (src/limits.py). Claude only; no local models.
@@ -19,7 +19,7 @@ from limits import Limiter
 from search import Searcher
 
 MAX_QUESTION_CHARS = 600
-TITLE = "Ask Gerry's Library"
+TITLE = "The CSCL Bot"
 INTRO = """\
 Ask a question about **computer-supported collaborative learning (CSCL)**. csclbot searches
 Gerry Stahl's 22 e-library volumes and the articles of the *International Journal of

@@ -1,6 +1,6 @@
 # csclbot
 
-Public RAG question-answering interface ("Ask Gerry's Library") over Gerry Stahl's writings and the ijCSCL journal articles, intended for Azure Container Apps.
+Public RAG question-answering interface ("The CSCL Bot") over Gerry Stahl's writings and the ijCSCL journal articles, intended for Azure Container Apps.
 
 The repository also documents the analyses for Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
 

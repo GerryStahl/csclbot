@@ -6,6 +6,11 @@
 # Prerequisites: Azure CLI (brew install azure-cli), `az login`, ANTHROPIC_API_KEY exported in this shell.
 # The key is passed to Azure as a secret from the environment; it is never written to a file or printed.
 set -euo pipefail
+set +x   # never trace: the script handles secrets (do not run it with bash -x)
+umask 077
+export AZURE_CORE_ONLY_SHOW_ERRORS=true PYTHONWARNINGS=ignore
+RENDERED="$(mktemp)"
+trap 'rm -f "$RENDERED"' EXIT   # the rendered file contains secrets
 
 SUBSCRIPTION="${SUBSCRIPTION:?set SUBSCRIPTION to the subscription id or name}"
 LOCATION="${LOCATION:-eastus}"
@@ -51,9 +56,8 @@ export ACR_PASSWORD=$(az acr credential show -n "$ACR" --query "passwords[0].val
 export IMAGE="${ACR_SERVER}/csclbot:${TAG}"
 export HASH_SALT=$(python3 -c "import secrets; print(secrets.token_hex(16))")
 export ENV_ID=$(az containerapp env show -g "$RG" -n "$ENV_NAME" --query id -o tsv)
-envsubst < deploy/containerapp.yaml > /tmp/containerapp.rendered.yaml
-az containerapp create -g "$RG" -n "$APP" --yaml /tmp/containerapp.rendered.yaml
-rm -f /tmp/containerapp.rendered.yaml
+envsubst < deploy/containerapp.yaml > "$RENDERED"
+az containerapp create -g "$RG" -n "$APP" --yaml "$RENDERED"
 
 az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv | sed 's|^|https://|'
 echo "Storage account for logs: $SA (share: state)"

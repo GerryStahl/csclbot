@@ -32,6 +32,6 @@ The three copied files below are identical to the versions in Anniversary commit
 
 ## Copyright policy
 
-- Gerry holds the copyright to his own books and chapters.
-- For ijCSCL articles the repository stores only citation metadata and short summaries. Article PDFs and text stay under `data/private/` (git-ignored) on the local machine.
+- Gerry holds the copyright to his own books and chapters; the deployed container image (private registry) holds their text.
+- For ijCSCL articles (Springer) the repository and the image store only citation metadata and short summaries. Article PDFs and text stay under `data/private/` or in the Anniversary project on the local machine; `*.pdf` is git-ignored and excluded from the image build.
 - Article titles come only from `metadata_corrections.csv` and `ijcscl.json`, never from PDFs.

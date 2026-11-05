@@ -1,68 +1,73 @@
-# csclbot
+# The CSCL Bot (csclbot)
 
-Public RAG question-answering interface ("The CSCL Bot") over Gerry Stahl's writings and the ijCSCL journal articles, intended for Azure Container Apps.
+**Live at https://csclbot.gerrystahl.net**
 
-The repository also documents the analyses for Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
+The CSCL Bot answers questions about computer-supported collaborative learning (CSCL). It searches Gerry Stahl's 22 e-library volumes (337 chapters) and the *International Journal of Computer-Supported Collaborative Learning* (ijCSCL, 2006–2025), then writes a short answer with APA citations, page numbers and full references. Where the same work exists in several places (a journal article and its book-chapter reprint, or a chapter's original publication) every reference is shown, so users can pick a source they can access.
 
-**Status:** reference data, paper analyses, the search index and retrieval with APA references are done ([sample results](reports/sample_results.md)); the Claude answer layer works from the command line ([sample answers](reports/sample_answers.md)); the Gradio page works locally (`src/app.py`); **live at https://csclbot.gerrystahl.net** (Azure Container Apps; see the [deployment record](documentation/deployment.md)).
+It is a research prototype. The page tells visitors that usage, questions and answers are stored.
 
-## Source projects (read-only archives)
+The repository also holds the data and analyses behind Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
 
-- [E-Library](https://github.com/GerryStahl/E-Library) (`../elibrary`) — 22 books / 337 chapters; FAISS + BM25 over 36,089 chunks, `e5-base-v2` (768-dim).
-- [anniversary](https://github.com/GerryStahl/anniversary) (`../anniversary`) — ~470 ijCSCL articles (2006–2025); article-level data only (no chunks, no FAISS), `all-MiniLM-L6-v2` (384-dim). Hand-corrected titles live in `data/inputs/metadata_corrections.csv`.
-- [Sculpture](https://github.com/GerryStahl/Sculpture) — related project of Gerry's, not used here.
+## How it works
 
-See [documentation/sources.md](documentation/sources.md) for exactly which files were taken from them, with commits and checksums. This repository holds no book or journal-article text; the copyright policy is stated there.
-
-## Layout
-
-- `data/inputs/` — small inputs copied from the Anniversary project (metadata, short summaries, trends dataset)
-- `data/references.json` — one APA reference with page numbers per citable document; [schema](documentation/references_schema.md)
-- `data/` — `data/private/` and `data/raw/` are git-ignored
-- `src/` — reference pipeline, paper analyses, and (later) the hosted app
-- `Dockerfile`, `deploy/` — Azure Container Apps deployment (`deploy.sh`, `containerapp.yaml`, `fetch_logs.sh`)
-- `documentation/` — [sources](documentation/sources.md), [paper analyses](documentation/paper_analyses.md), [reference schema](documentation/references_schema.md)
-- `reports/` — `references.csv`, era-comparison and trend-test tables, `figures/`, and the paper draft
-
-## Search (retrieval only)
-
-One index, one embedding model (`e5-base-v2`, 768-dim): 17,441 e-library chunks and 335 chapter summaries (vectors reused from E-Library) plus 463 ijCSCL article summaries (embedded here; no article text). Dense and BM25 rankings are fused, then grouped into book chapters and journal articles. Every result carries its APA reference, an in-text citation with page(s), and the linked references (journal article ↔ book-chapter reprint, original publication), so users can choose a source they can access.
-
-```bash
-.venv/bin/python src/build_index.py                       # needs ../elibrary; writes data/index/ (git-ignored)
-.venv/bin/python src/search.py "How is group cognition different from individual cognition?"
-.venv/bin/python src/sample_results.py                    # 15 test questions -> reports/sample_results.md
+```
+question ─► search ─► numbered passages ─► Claude answer ─► APA citations ─► page
+            (dense + BM25,     (S1…Sn)       (grounded, tags     (made by the program,
+             one e5-base-v2                   claims [S#])        not by the model)
+             index)
 ```
 
-Book pages are located by matching each chunk's text in the volume PDF (the page numbers in the old index drift by 1–3 pages). About 1% of chunks could not be matched and take the previous chunk's page. Article citations give the whole article's page range, because articles are indexed by summary only.
+1. **One index, one model.** 17,441 e-library chunks and 335 chapter summaries (`e5-base-v2`, vectors reused from E-Library) plus 463 ijCSCL article summaries embedded with the same model. Journal articles are indexed by title and short summary only; no article text is stored. Dense and BM25 rankings are fused, then grouped into book chapters and journal articles.
+2. **Grounded answer.** Claude (default `claude-haiku-4-5-20251001`) answers from the numbered passages only and tags each claim `[S#]`. Article summaries are paraphrased, never quoted; quotations are checked against the passages, with one revision pass if any cannot be verified.
+3. **Citations.** The program turns each tag into an APA in-text citation with the page(s) of that passage (2026a/2026b when one author has several works in a year) and appends the references of the sources actually cited, with their alternatives. Book pages are located by matching chunk text in the volume PDFs. Article citations give the article's whole page range.
+4. **Safeguards.** Per visitor 8 questions/hour and 30/day; a daily spend cap ($5 by default) kept on persistent storage; questions limited to 600 characters; Claude only.
+5. **Usage log.** Every event is appended to `usage.csv` (Excel-readable): time, event, country, anonymous visitor id (a salted hash; the IP address is never stored), question, answer, retrieved and cited documents, tokens, estimated cost, seconds, unverified quotations. Country comes from a local MaxMind GeoLite2 database.
 
-## Answers (Claude)
-
-`src/answer.py` retrieves the best passages (up to two per document), numbers them S1…Sn, and asks Claude (default `claude-haiku-4-5-20251001`) to answer from those sources only, tagging claims with `[S#]`. The program, not the model, turns each tag into an APA in-text citation with the page(s) of that passage (2026a/2026b when one author has several works in a year) and appends the full references of the sources actually cited, with their alternative sources. Journal articles are represented by short summaries only, so they are paraphrased, never quoted. Quotations are checked against the passages; one revision pass runs if any cannot be verified, and anything still unverified is flagged.
-
-```bash
-export ANTHROPIC_API_KEY=...      # in your shell profile, never in the repo
-.venv/bin/python src/answer.py "How is group cognition different from individual cognition?" [--model MODEL]
-.venv/bin/python src/sample_answers.py                     # 8 test questions -> reports/sample_answers.md
-```
-
-Cost with Haiku is roughly 4,000 input and 450 output tokens per question (check current Anthropic pricing).
-
-## Web page
-
-```bash
-.venv/bin/python src/app.py        # http://127.0.0.1:7860 (set PORT to change); needs ANTHROPIC_API_KEY
-```
-
-`src/app.py` is a Gradio page (question box, examples, answer with references, a collapsible panel of the passages used). Claude only. `src/limits.py` limits each visitor to 8 questions per hour and 30 per day and stops answering when the day's estimated spend reaches the cap ($5 by default); the spend total is kept in `data/usage.json` (git-ignored). Override with `CSCLBOT_HOURLY_LIMIT`, `CSCLBOT_DAILY_LIMIT`, `CSCLBOT_DAILY_SPEND_CAP_USD`, and the per-million-token prices with `CSCLBOT_INPUT_USD_PER_MTOK` and `CSCLBOT_OUTPUT_USD_PER_MTOK` (defaults are for Haiku 4.5; check Anthropic's current prices).
-
-**Usage log.** Every event (answered, blocked, error) is appended to `data/logs/usage.csv` (git-ignored; open it in Excel): time, event, country, anonymous visitor id, question, answer, retrieved and cited documents, passages, model, tokens, estimated cost, seconds, unverified quotations. The IP address is never stored: the visitor id is a salted hash. Country comes from a CDN header (`CF-IPCountry`) or from a local MaxMind GeoLite2 Country database (free account needed; save it as `data/GeoLite2-Country.mmdb` or set `CSCLBOT_GEOIP_DB`); otherwise it is `unknown`, and `local` for this machine. The page tells visitors that questions and answers are stored. In the cloud set `CSCLBOT_LOG_DIR` to a persistent volume. Summarize with `.venv/bin/python src/usage_report.py` (totals by day and country, cost, most-cited documents, latest questions). Questions are not logged.
-
-## Setup
+## Quick start (local)
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-paper.txt
+export ANTHROPIC_API_KEY=...        # in your shell profile; never in the repo or on a command line you trace
+
+.venv/bin/python src/build_index.py                  # needs ../elibrary; writes data/index/ (git-ignored)
+.venv/bin/python src/search.py "How is group cognition different from individual cognition?"
+.venv/bin/python src/answer.py "How can teachers be supported in orchestrating CSCL?"
+.venv/bin/python src/app.py                          # http://127.0.0.1:7860
 ```
 
-To reproduce the paper's tables and figure, see [documentation/paper_analyses.md](documentation/paper_analyses.md).
+Test sets: `src/sample_results.py` (15 questions, retrieval only → `reports/sample_results.md`) and `src/sample_answers.py` (8 questions with Claude → `reports/sample_answers.md`). Limits and prices can be overridden with `CSCLBOT_*` environment variables (see `src/limits.py`).
+
+## Hosting and usage reports
+
+The app runs on Azure Container Apps (scale to zero, one replica), built in the cloud from the [Dockerfile](Dockerfile). Deployment, resource names, DNS and update steps: [documentation/deployment.md](documentation/deployment.md). To read the cloud usage log on your machine:
+
+```bash
+bash deploy/fetch_logs.sh                 # needs `az login`; copies usage.csv to data/logs/
+.venv/bin/python src/usage_report.py      # totals by day and country, cost, most-cited documents, latest questions
+```
+
+## Reference data
+
+`data/references.json` and `reports/references.csv` hold one APA 7 reference with page numbers for every ijCSCL article and every e-library chapter, plus the original publications. Schema and decisions: [documentation/references_schema.md](documentation/references_schema.md). Rebuild with `src/fetch_crossref.py`, `src/locate_chapter_pages.py`, `src/build_references.py`.
+
+## Paper analyses
+
+Trend tests, the editorial-era comparison (Figure 1) and the full-text keyword scan for "ijCSCL Through Evolving Times" are documented, with every number mapped to its script, in [documentation/paper_analyses.md](documentation/paper_analyses.md). Both paper drafts are in `reports/`.
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `src/` | search, answer, web app, limits, usage log and report; reference pipeline; paper analyses |
+| `data/inputs/` | small inputs copied from the Anniversary project (metadata, short summaries, trends dataset) |
+| `data/references.json` | the reference data |
+| `deploy/`, `Dockerfile` | Azure deployment scripts and image definition |
+| `documentation/` | [sources](documentation/sources.md), [deployment](documentation/deployment.md), [paper analyses](documentation/paper_analyses.md), [reference schema](documentation/references_schema.md) |
+| `reports/` | reference list, analysis tables, figures, sample results and answers, paper drafts |
+
+Git-ignored and rebuilt or supplied locally: `data/index/` (search index), `data/raw/` (Crossref cache, chapter pages), `data/logs/` and `data/usage.json`, `data/GeoLite2-Country.mmdb` (MaxMind, free account), `.venv/`.
+
+## Sources and copyright
+
+Built on three earlier projects: [E-Library](https://github.com/GerryStahl/E-Library), [anniversary](https://github.com/GerryStahl/anniversary) and the related [Sculpture](https://github.com/GerryStahl/Sculpture) (not used here). [documentation/sources.md](documentation/sources.md) lists which files were taken, with commits and checksums. Gerry holds the copyright to his own books and chapters; the deployed image holds their text. For journal articles (Springer) only citation metadata and short summaries are stored: no article text and no PDFs, in the repository or the image (`*.pdf` is git-ignored and excluded from the build).

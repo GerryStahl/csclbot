@@ -5,21 +5,19 @@ __pycache__/
 .env
 .azure/
 
-# Copyrighted article text and anything derived from it stays local
+# Never commit: journal-article PDFs (Springer's); only our own figures are allowed
+*.pdf
+*.PDF
+!reports/figures/*.pdf
 data/private/
 data/raw/
 data/raw */
 
-# Journal-article PDFs are Springer's: never commit. Only our own figures are allowed.
-*.pdf
-*.PDF
-!reports/figures/*.pdf
+# Rebuildable or machine-specific data
+data/index/
+data/logs/
+data/usage.json
+data/GeoLite2-Country.mmdb
 
 # Personal reference-library export, not part of the repo
 reports/EndNote all references.docx
-
-# Search index (rebuildable by src/build_index.py)
-data/index/
-data/usage.json
-data/logs/
-data/GeoLite2-Country.mmdb

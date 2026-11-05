@@ -5,7 +5,7 @@
 
 ## Project
 
-csclbot is a public, Azure-hosted RAG chat interface over Gerry's books/chapters (`../elibrary`) and ijCSCL journal articles (`../anniversary`). Both source projects are **read-only archives**; never modify them.
+csclbot ("The CSCL Bot") is a public RAG chat interface over Gerry's books/chapters and ijCSCL journal articles, live at https://csclbot.gerrystahl.net on Azure Container Apps (see `documentation/deployment.md`). It was built from the older projects `../elibrary` and `../anniversary`; all future work happens in this repository (`GerryStahl/csclbot`) and the other repositories are not changed unless Gerry asks.
 
 ## Conventions
 
@@ -17,6 +17,8 @@ csclbot is a public, Azure-hosted RAG chat interface over Gerry's books/chapters
 ## Constraints
 
 - Gerry holds copyright on his own books/chapters only. For journal articles, the hosted app must hold no full text: store only embeddings, citation metadata and short summaries, and cap any quotation. Article text stays under `data/private/` (git-ignored).
-- Article titles come only from `../anniversary/data/metadata_corrections.csv` and its `ijcscl.json`; never re-parse them from PDFs.
+- Article titles come only from `data/inputs/metadata_corrections.csv` and `data/inputs/ijcscl.json` (copies from the Anniversary project); never re-parse them from PDFs.
 - Embedding models differ between sources (`e5-base-v2` 768-dim vs `all-MiniLM-L6-v2` 384-dim); one index must use one model.
 - Hosted version is Claude-only (no Ollama), with rate limits and a spend cap.
+- Secrets: never print, trace or log `ANTHROPIC_API_KEY` or other secrets (no `bash -x` on scripts that handle them); read only filtered output. Never commit secrets, the MaxMind database, usage logs or PDFs.
+- Do not create or change Azure resources without Gerry's confirmation; deployment steps are in `documentation/deployment.md`.

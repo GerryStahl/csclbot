@@ -168,6 +168,7 @@ class Searcher:
             "cite_short": doc["cite_short"],
             "title": doc["title"],
             "reference": doc["apa"],
+            "license": doc.get("license"),
             "pages": pages,
             "snippets": snippets,
             "passages": [
@@ -218,7 +219,7 @@ def in_text(doc: dict, pages: str | None) -> str:
 
 def format_results(query: str, results: list[dict]) -> str:
     lines = [f"## {query}", ""]
-    headings = {"book": "Book chapters (Stahl e-library)", "article": "ijCSCL articles (summaries; keyword matches give exact pages)"}
+    headings = {"book": "Book chapters (Stahl e-library)", "article": "ijCSCL articles (full-text passages for open-access articles, summaries for the rest)"}
     n = 0
     for group in ("book", "article"):
         part = [r for r in results if r["group"] == group]

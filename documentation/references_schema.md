@@ -41,6 +41,7 @@ A document:
 | `cite_short` | `Kapur & Kinzer, 2009` / `Stahl et al., 2014`; the app adds the page, e.g. `(Stahl et al., 2014, p. 241)` |
 | `corpus` | keys that join to the indexes: ijCSCL record id, or `book_number` + `chapter_number` |
 | `related` | `reprint_of` / `reprinted_in` (chapter ↔ ijCSCL article), `originally_published_as` / `original_of`, `same_text_as` (same chapter in two volumes) |
+| `license` | Creative Commons licence of an open-access ijCSCL article from Crossref (`{name, url, source}`), else `null`; 83 CC BY 4.0, 11 CC BY-NC 2.0 |
 | `provenance` | where authors, title and pages came from |
 | `review` | `{status: ok \| review, issues: [...]}` |
 

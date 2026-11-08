@@ -16,7 +16,7 @@ csclbot ("The CSCL Bot") is a public RAG chat interface over Gerry's books/chapt
 
 ## Constraints
 
-- Gerry holds copyright on his own books/chapters only. For journal articles, the hosted app must hold no full text: store only embeddings, citation metadata and short summaries, and cap any quotation. Article text stays under `data/private/` (git-ignored).
+- Gerry holds copyright on his own books/chapters only. For journal articles the hosted app may hold full text only for articles whose Crossref licence is Creative Commons (`license` in `data/references.json`; currently CC BY 4.0 and CC BY-NC 2.0, bot non-commercial) and must show the licence with the reference; for all other articles store only embeddings, citation metadata, short summaries and the text-free keyword index, and cap any quotation. Never commit or ship PDFs.
 - Article titles come only from `data/inputs/metadata_corrections.csv` and `data/inputs/ijcscl.json` (copies from the Anniversary project); never re-parse them from PDFs.
 - Embedding models differ between sources (`e5-base-v2` 768-dim vs `all-MiniLM-L6-v2` 384-dim); one index must use one model.
 - Hosted version is Claude-only (no Ollama), with rate limits and a spend cap.

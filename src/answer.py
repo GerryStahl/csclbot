@@ -26,8 +26,8 @@ QUOTE_LIMIT_WORDS = 25
 
 SYSTEM = f"""You are csclbot, a research assistant for the field of computer-supported collaborative learning (CSCL). \
 You answer questions using ONLY the numbered sources supplied in the user message: passages from Gerry Stahl's \
-books and chapters, and short summaries of articles in the International Journal of Computer-Supported \
-Collaborative Learning (ijCSCL).
+books and chapters, passages from open-access articles in the International Journal of Computer-Supported \
+Collaborative Learning (ijCSCL), and short summaries of the other ijCSCL articles.
 
 Rules:
 - Ground every claim in the sources and mark it with the source tag in square brackets, e.g. [S3] or [S2, S5]. \
@@ -148,6 +148,8 @@ def references_block(cited: list[dict], suffix: dict[str, str]) -> str:
     lines = ["**References**", ""]
     for ref, d in sorted(entries, key=lambda e: e[0]):
         lines.append(f"- {ref}")
+        if d.get("license"):
+            lines.append(f"  - *Open access, {d['license']['name']}:* {d['license']['url']}")
         for a in d["also"]:
             lines.append(f"  - *{a['label']}:* {a['reference']}")
     return "\n".join(lines)
@@ -230,7 +232,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
         "stop_reason": msg.stop_reason,
         "quote_problems": problems,
         "passages_used": [
-            {"cite": f"{s['cite']}", "reference": s["doc"]["reference"], "kind": s["kind"], "text": s["text"]} for s in cited
+            {"cite": f"{s['cite']}", "reference": s["doc"]["reference"], "kind": s["kind"], "text": s["text"], "license": (s["doc"].get("license") or {}).get("name")} for s in cited
         ],
     }
 

@@ -66,6 +66,15 @@ def crossref_authors(item: dict) -> list[dict]:
     return out
 
 
+def open_license(item: dict | None) -> dict | None:
+    """Creative Commons licence deposited by the publisher in Crossref, e.g. {'name': 'CC BY 4.0', 'url': ...}."""
+    for lic in (item or {}).get("license", []) or []:
+        m = re.search(r"creativecommons\.org/licenses/([a-z-]+)/([\d.]+)", lic.get("URL", ""))
+        if m:
+            return {"name": f"CC {m.group(1).upper()} {m.group(2)}", "url": f"https://creativecommons.org/licenses/{m.group(1)}/{m.group(2)}/", "source": "Crossref"}
+    return None
+
+
 def build_ijcscl(articles: dict, crossref: dict) -> list[dict]:
     by_title = {norm_key(v["title"][0]): v for v in crossref.values() if v.get("title")}
     docs, seen_doi = [], {}
@@ -155,6 +164,7 @@ def build_ijcscl(articles: dict, crossref: dict) -> list[dict]:
                     "article_number": rec["article_number"],
                 },
                 "related": [],
+                "license": open_license(cr),
                 "provenance": prov,
                 "_sort": (int(volume), int(re.match(r"\d+", issue).group()), rec["article_number"] or 0, rec_id),
                 "issues": issues,

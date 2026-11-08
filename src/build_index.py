@@ -4,7 +4,9 @@ One index, one embedding model (intfloat/e5-base-v2, 768-dim):
   * e-library base-level chunks (17,441)   vectors reused from ../elibrary/vector_store/elibrary.faiss
   * e-library chapter summaries (335)      vectors reused from ../elibrary/vector_store/chapter_summaries.faiss
   * ijCSCL article summaries (~465)        embedded here: title + 50-60-word Haiku summary
-Journal articles are indexed by title and short summary only; no article text is read or stored.
+Journal articles are indexed by title and short summary only, except the open-access articles with a
+Creative Commons licence in the reference data (CC BY 4.0, CC BY-NC 2.0): their full text is added as
+passages (about 150 words) with exact printed pages and the licence, read from the local Anniversary PDFs.
 
 Every item carries the id of its record in data/references.json and, for book chunks, the book page
 (located by matching the chunk text in the book PDF; the chunk page numbers stored in the old index
@@ -35,6 +37,7 @@ import numpy as np
 import Stemmer
 
 from anniversary_corpus import NOTICE
+from build_keyword_index import body_pages, pdf_index
 from index_common import INDEX_DIR, MODEL_NAME, PASSAGE_PREFIX
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -162,6 +165,70 @@ def article_items(refs: dict) -> list[dict]:
     return items
 
 
+CHUNK_WORDS, CHUNK_STRIDE = 150, 120
+
+
+def strip_running_text(pages: list[str]) -> list[list[str]]:
+    """Lines per page without running heads and bare page numbers (lines repeated on >= 35% of the pages)."""
+    lines = [[ln.strip() for ln in text.splitlines() if ln.strip()] for text in pages]
+    seen: dict[str, int] = {}
+    for page in lines:
+        for ln in set(page):
+            seen[ln] = seen.get(ln, 0) + 1
+    limit = max(3, int(0.35 * len(pages)))
+    return [[ln for ln in page if not (seen[ln] >= limit and len(ln) < 120) and not ln.isdigit()] for page in lines]
+
+
+def join_hyphenated(tokens: list[str], page: int) -> list[tuple[str, int]]:
+    """'sand-' 'stone' -> 'sandstone': the typesetter's line-break hyphens (hyphen at the end of a token)."""
+    out: list[tuple[str, int]] = []
+    i = 0
+    while i < len(tokens):
+        t = tokens[i]
+        if t.endswith("-") and len(t) > 2 and t[-2].isalpha() and i + 1 < len(tokens) and tokens[i + 1][:1].islower():
+            out.append((t[:-1] + tokens[i + 1], page))
+            i += 2
+        else:
+            out.append((t, page))
+            i += 1
+    return out
+
+
+def open_access_items(refs: dict) -> list[dict]:
+    """Full-text passages of the articles with a Creative Commons licence, with exact printed pages."""
+    files = pdf_index()
+    items = []
+    for d in refs["documents"]:
+        if not d["id"].startswith("ijcscl:") or not d.get("license") or not d.get("pages") or NOTICE.search(d["title"]):
+            continue
+        pdf_file = files.get(d["corpus"]["record_id"])
+        first, last = int(d["pages"]["first"]), int(d["pages"]["last"])
+        if pdf_file is None:
+            continue
+        pdf = fitz.open(pdf_file)
+        if len(pdf) != last - first + 1:
+            continue
+        words: list[tuple[str, int]] = []
+        for offset, page in enumerate(strip_running_text(body_pages(pdf))):
+            words += join_hyphenated([w for ln in page for w in ln.split()], first + offset)
+        for start in range(0, max(len(words) - 40, 1), CHUNK_STRIDE):
+            window = words[start : start + CHUNK_WORDS]
+            if sum(any(c.isdigit() for c in w) for w, _ in window) > 0.3 * len(window):  # table fragments
+                continue
+            items.append(
+                {
+                    "kind": "chunk",
+                    "doc_id": d["id"],
+                    "page": window[0][1],
+                    "page_end": window[-1][1],
+                    "text": " ".join(w for w, _ in window),
+                    "license": d["license"]["name"],
+                }
+            )
+    print(f"{len(items)} passages from {len({i['doc_id'] for i in items})} open-access articles")
+    return items
+
+
 def ref_title(refs: dict, doc_id: str) -> str:
     return next(d["title"] for d in refs["documents"] if d["id"] == doc_id)
 
@@ -185,8 +252,11 @@ def main() -> None:
     model = SentenceTransformer(MODEL_NAME)
     vec_arts = model.encode([PASSAGE_PREFIX + a["text"] for a in arts], normalize_embeddings=True, batch_size=32, show_progress_bar=False)
 
-    items = lib + arts
-    vectors = np.vstack([vec_chunks, vec_summaries, vec_arts]).astype("float32")
+    oa = open_access_items(refs)
+    vec_oa = model.encode([PASSAGE_PREFIX + i["text"] for i in oa], normalize_embeddings=True, batch_size=32, show_progress_bar=False)
+
+    items = lib + arts + oa
+    vectors = np.vstack([vec_chunks, vec_summaries, vec_arts, vec_oa]).astype("float32")
     missing = {i["doc_id"] for i in items} - known
     assert not missing, f"items without a reference record: {sorted(missing)[:5]}"
     assert len(items) == len(vectors)

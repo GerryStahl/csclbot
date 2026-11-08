@@ -37,5 +37,5 @@ Embeddings and the summaries cannot find a word that occurs only in the body of 
 ## Copyright policy
 
 - Gerry holds the copyright to his own books and chapters; the deployed container image (private registry) holds their text.
-- For ijCSCL articles (Springer) the repository and the image store only citation metadata, short summaries and the keyword index above. Article PDFs and text stay under `data/private/` or in the Anniversary project on the local machine; `*.pdf` is git-ignored and excluded from the image build.
+- ijCSCL articles (Springer): the image holds full-text passages only for articles with a Creative Commons licence in Crossref (83 CC BY 4.0, 11 CC BY-NC 2.0; 89 have a usable PDF page range). `src/build_index.py` reads them from the local PDFs; the licence is stored in `data/references.json` (`license`) and shown with every reference that uses them. CC BY requires attribution (credit, licence link, indication of changes); CC BY-NC means the bot must stay non-commercial. For all other articles only citation metadata, short summaries and the keyword index above are stored. PDFs are never committed or shipped (`*.pdf` is git-ignored and excluded from the image build).
 - Article titles come only from `metadata_corrections.csv` and `ijcscl.json`, never from PDFs.

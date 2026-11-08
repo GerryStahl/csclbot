@@ -53,6 +53,10 @@ The cloud app writes the Excel-readable log inside Azure, **not** into your proj
 4. Run `deploy/deploy.sh` with `SUBSCRIPTION`, `SUFFIX` and `ANTHROPIC_API_KEY` set. I run it step by step so any error can be fixed as it occurs.
 5. Test the live address (a question, a blocked question, the notice, the log file), then put the URL into the paper.
 
+## Rebuilding the index before an update
+
+After changing the index (`src/build_index.py`, `src/build_keyword_index.py`), rebuild the image so that `data/index/` is copied in, then update the app as below.
+
 ## Updating, stopping, deleting
 
 - **New version:** `az acr build -r <acr> -t csclbot:<tag> .`, then `az containerapp update -g rg-csclbot -n csclbot --image <acr>.azurecr.io/csclbot:<tag>`.

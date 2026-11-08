@@ -29,8 +29,9 @@ Gerry Stahl's 22 e-library volumes and the articles of the *International Journa
 Computer-Supported Collaborative Learning* (ijCSCL, 2006–2025), then writes a short answer that cites its
 sources in APA style, with page numbers.
 
-*Book passages are quoted from the e-library. For ijCSCL articles csclbot holds only citation data and
-short summaries, so articles are paraphrased from the summary and cited by their whole page range.*
+*Book passages are quoted from the e-library. For ijCSCL articles csclbot holds only citation data, short
+summaries and an index of which words occur on which pages (no article text), so articles are paraphrased from
+their summaries and cited by the pages where the search words occur.*
 """
 EXAMPLES = [
     "How is group cognition different from individual cognition?",
@@ -75,7 +76,7 @@ def passages_markdown(passages: list[dict]) -> str:
         return "*No passages were cited.*"
     out = []
     for p in passages:
-        label = "summary of the article" if p["kind"] == "article_summary" else ("summary of the chapter" if p["kind"] == "chapter_summary" else "passage")
+        label = {"article_summary": "summary of the article", "chapter_summary": "summary of the chapter", "article_pages": "pages where the search words occur"}.get(p["kind"], "passage")
         out.append(f"**{p['cite']}** — {label}\n\n> {p['text']}")
     return "\n\n".join(out)
 

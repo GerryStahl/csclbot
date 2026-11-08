@@ -39,6 +39,12 @@ Never fill gaps from memory.
 - Paraphrase. Quote at most {QUOTE_LIMIT_WORDS} consecutive words from a passage, in quotation marks, exactly as \
 written and as one continuous stretch (no ellipses inside a quotation). Article sources are summaries: never use \
 quotation marks for words taken from them, and do not claim details beyond what the summary says.
+- A "keyword match" source only says that the search words occur on the listed pages of an article; it gives no \
+text. You may say that the words occur there, using the citation, but never claim what the article says about \
+them beyond that article's summary and the book passages.
+- If the sources include a "Search note", report it: say that the word occurs in that many articles, name the \
+earliest ones with their citations, and state plainly what the sources do not show (what those articles say about \
+it). For "when" or "first" questions use the publication years, and say that this reflects the sources found.
 - Where sources show different positions, say so. Write for a researcher: clear, precise, about 150-350 words, \
 no headings, no bullet lists unless the question asks for a list.
 - Answer in the user's language only if it is English; otherwise reply in English."""
@@ -62,9 +68,16 @@ def format_sources(sources: list[dict]) -> str:
             "chunk": f"{s['doc']['type'].replace('_', ' ')}, passage",
             "chapter_summary": "book chapter, summary of the whole chapter",
             "article_summary": f"{s['doc']['type'].replace('_', ' ')}, short summary (do not quote)",
+            "article_pages": f"{s['doc']['type'].replace('_', ' ')}, keyword match: page numbers only, no text",
         }[s["kind"]]
         blocks.append(f"[S{s['n']}] {s['cite']} — {what}\n{s['text']}")
     return "\n\n".join(blocks)
+
+
+def format_notes(results: list[dict]) -> str:
+    """Search notes (e.g. how many articles contain a rare word and which are earliest) for the model."""
+    notes = [r["note"] for r in results if r.get("note")]
+    return ("\n\n" + "\n".join(notes)) if notes else ""
 
 
 def merge_pages(page_strings: list[str]) -> str:
@@ -182,7 +195,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
         model=model,
         max_tokens=MAX_TOKENS,
         system=SYSTEM,
-        messages=[{"role": "user", "content": f"Sources:\n\n{format_sources(sources)}\n\nQuestion: {question}"}],
+        messages=[{"role": "user", "content": f"Sources:\n\n{format_sources(sources)}{format_notes(results)}\n\nQuestion: {question}"}],
     )
     raw = strip_headings("".join(b.text for b in msg.content if b.type == "text"))
     usage = [msg.usage.input_tokens, msg.usage.output_tokens]
@@ -193,7 +206,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
             max_tokens=MAX_TOKENS,
             system=SYSTEM,
             messages=[
-                {"role": "user", "content": f"Sources:\n\n{format_sources(sources)}\n\nQuestion: {question}"},
+                {"role": "user", "content": f"Sources:\n\n{format_sources(sources)}{format_notes(results)}\n\nQuestion: {question}"},
                 {"role": "assistant", "content": raw},
                 {"role": "user", "content": "Revise your answer. These quotations cannot be verified in the passages: "
                  + "; ".join(problems) + ". Paraphrase them or quote exact continuous text from a passage (max "

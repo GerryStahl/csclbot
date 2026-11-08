@@ -30,8 +30,12 @@ The three copied files below are identical to the versions in Anniversary commit
 | First/last page of each e-library chapter | scan of the volume PDFs | `data/raw/elibrary_chapter_pages.json` (git-ignored, rebuilt by `src/locate_chapter_pages.py`; needs `../elibrary`) |
 | APA references (output) | merged from the above | `data/references.json`, `reports/references.csv`; see [references_schema.md](references_schema.md) |
 
+## Keyword index of the journal articles (derived data)
+
+Embeddings and the summaries cannot find a word that occurs only in the body of an article (for example "squibs": 26 articles contain it, one index item mentions it). `src/build_keyword_index.py` therefore builds a page-level keyword index from the local Anniversary PDFs: for each article page, only a bag of stemmed words with BM25 weights (`data/index/kw_bm25/`) and the printed page number (`kw_pages.jsonl`). It stores no text and no word order, so no text can be read back or quoted; reference lists are cut off first. Printed page = first page of the article + PDF page index (verified: 469 of 470 PDFs have exactly one PDF page per printed page; one article without a page range is skipped). 9,276 pages from 462 articles; 14 MB. The index is git-ignored and shipped in the image. Whether this kind of derived data is acceptable for Springer's articles is Gerry's decision; remove `kw_bm25/` and `kw_pages.jsonl` from `data/index/` to switch it off (the search falls back to summaries).
+
 ## Copyright policy
 
 - Gerry holds the copyright to his own books and chapters; the deployed container image (private registry) holds their text.
-- For ijCSCL articles (Springer) the repository and the image store only citation metadata and short summaries. Article PDFs and text stay under `data/private/` or in the Anniversary project on the local machine; `*.pdf` is git-ignored and excluded from the image build.
+- For ijCSCL articles (Springer) the repository and the image store only citation metadata, short summaries and the keyword index above. Article PDFs and text stay under `data/private/` or in the Anniversary project on the local machine; `*.pdf` is git-ignored and excluded from the image build.
 - Article titles come only from `metadata_corrections.csv` and `ijcscl.json`, never from PDFs.

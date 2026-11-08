@@ -27,9 +27,11 @@ GEOIP_DB = Path(os.environ.get("CSCLBOT_GEOIP_DB", ROOT / "data" / "GeoLite2-Cou
 COLUMNS = [
     "timestamp_utc", "event", "country", "visitor", "question", "answer", "retrieved_docs", "cited_docs",
     "n_passages", "model", "input_tokens", "output_tokens", "est_cost_usd", "seconds", "quote_problems", "note",
+    "conversation", "turn", "searched_for",
 ]
 _lock = threading.Lock()
 _reader = None
+_header_checked = False
 
 
 def _salt() -> str:
@@ -70,6 +72,25 @@ def country_for(ip: str, headers: dict | None = None) -> str:
     return (rec.get("country") or rec.get("registered_country") or {}).get("iso_code", "unknown")
 
 
+def _upgrade_header() -> None:
+    """If an older log file has fewer columns, rewrite it once with the current header (rows padded)."""
+    global _header_checked
+    _header_checked = True
+    if not LOG_FILE.exists():
+        return
+    with LOG_FILE.open(newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        if reader.fieldnames == COLUMNS:
+            return
+        rows = list(reader)
+    tmp = LOG_FILE.with_suffix(".csv.tmp")
+    with tmp.open("w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=COLUMNS)
+        writer.writeheader()
+        writer.writerows({c: r.get(c, "") for c in COLUMNS} for r in rows)
+    tmp.replace(LOG_FILE)
+
+
 def log_event(**fields) -> None:
     """Append one row; unknown fields are ignored, missing ones left blank."""
     row = {c: fields.get(c, "") for c in COLUMNS}
@@ -79,6 +100,8 @@ def log_event(**fields) -> None:
             row[key] = "; ".join(map(str, row[key]))
     with _lock:
         LOG_DIR.mkdir(parents=True, exist_ok=True)
+        if not _header_checked:
+            _upgrade_header()
         new = not LOG_FILE.exists()
         # utf-8-sig so Excel reads accented characters correctly
         with LOG_FILE.open("a", newline="", encoding="utf-8-sig" if new else "utf-8") as f:

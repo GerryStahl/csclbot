@@ -6,6 +6,10 @@ sources and tags claims with [S#] -> the program replaces each tag by the source
 together with alternative sources (journal version / book reprint / original publication).
 Journal articles are represented only by their short summaries, so they are paraphrased, not quoted.
 
+Follow-up questions: ask(..., history=[{"q": ..., "a": ...}]) first rewrites the question into a standalone
+one (a short Haiku call) so the search understands "that" or "the second one", then answers with the last turns
+as context. Citations always come from the current turn's sources.
+
 Needs ANTHROPIC_API_KEY in the environment (never in the code or the repo).
 Run: .venv/bin/python src/answer.py "How is group cognition different from individual cognition?"
 """
@@ -23,6 +27,16 @@ from search import Searcher
 DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 900
 QUOTE_LIMIT_WORDS = 25
+HISTORY_TURNS = 3          # earlier question/answer pairs given to the model
+HISTORY_ANSWER_CHARS = 1200
+REWRITE_MAX_TOKENS = 120
+
+REWRITE_SYSTEM = (
+    "Rewrite the user's last question as ONE standalone question that can be understood without the conversation, "
+    "to search a library on computer-supported collaborative learning. Resolve references such as 'that', 'it', "
+    "'those studies' or 'the second one' using the conversation, and keep the user's key terms. If the last question "
+    "is already standalone or starts a new topic, return it unchanged. Output only the question."
+)
 
 SYSTEM = f"""You are csclbot, a research assistant for the field of computer-supported collaborative learning (CSCL). \
 You answer questions using ONLY the numbered sources supplied in the user message: passages from Gerry Stahl's \
@@ -47,6 +61,9 @@ earliest ones with their citations, and state plainly what the sources do not sh
 it). For "when" or "first" questions use the publication years, and say that this reflects the sources found.
 - Where sources show different positions, say so. Write for a researcher: clear, precise, about 150-350 words, \
 no headings, no bullet lists unless the question asks for a list.
+- If a conversation so far is shown, it is context only: you may build on or refer to your earlier answers, but \
+every new claim needs a tag from the CURRENT sources, and earlier citations must not be repeated as tags. Answer \
+the latest question without repeating the earlier answers.
 - Answer in the user's language only if it is English; otherwise reply in English."""
 
 TAG = re.compile(r"\[(S\d+(?:\s*[,;]\s*S\d+)*)\]")
@@ -170,7 +187,12 @@ def check_quotes(raw_answer: str, sources: list[dict]) -> list[str]:
     haystack = " ".join(norm_quote(s["text"]) for s in sources if s["kind"] != "article_summary")
     summaries = " ".join(norm_quote(s["text"]) for s in sources if s["kind"] == "article_summary")
     problems = []
-    for q in re.findall(r"[\u201c\"]([^\u201c\u201d\"]{12,}?)[\u201d\"]", raw_answer):
+    marks = [m.start() for m in re.finditer(r"[\u201c\u201d\"]", raw_answer)]
+    # quotation marks pair up in order (1st-2nd, 3rd-4th); a short quoted term must not shift the pairing
+    for open_at, close_at in zip(marks[0::2], marks[1::2]):
+        q = raw_answer[open_at + 1 : close_at]
+        if len(q) < 12:
+            continue
         if re.search(r"\.\.\.|\u2026", q):
             problems.append(f"ellipsis inside a quotation: \"{q[:70]}\"")
             continue
@@ -187,20 +209,47 @@ def check_quotes(raw_answer: str, sources: list[dict]) -> list[str]:
     return problems
 
 
-def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: int = 5, articles: int = 4) -> dict:
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("ANTHROPIC_API_KEY is not set. Export it in your shell profile and open a new terminal.")
-    results = searcher.search(question, books=books, articles=articles, per_doc=2)
-    sources = build_sources(results)
-    client = anthropic.Anthropic()
+def format_history(history: list[dict]) -> str:
+    turns = history[-HISTORY_TURNS:]
+    return "\n\n".join(f"Q: {h['q']}\nA: {h['a'][:HISTORY_ANSWER_CHARS]}" for h in turns)
+
+
+def rewrite_query(client: anthropic.Anthropic, question: str, history: list[dict], model: str) -> tuple[str, list[int]]:
+    """Standalone form of a follow-up question; unchanged (and no API call) when there is no history."""
+    if not history:
+        return question, [0, 0]
     msg = client.messages.create(
         model=model,
-        max_tokens=MAX_TOKENS,
-        system=SYSTEM,
-        messages=[{"role": "user", "content": f"Sources:\n\n{format_sources(sources)}{format_notes(results)}\n\nQuestion: {question}"}],
+        max_tokens=REWRITE_MAX_TOKENS,
+        system=REWRITE_SYSTEM,
+        messages=[{"role": "user", "content": f"Conversation:\n{format_history(history)}\n\nLast question: {question}"}],
     )
+    text = "".join(b.text for b in msg.content if b.type == "text").strip().strip('"')
+    standalone = text if 0 < len(text) <= 400 else question
+    return standalone, [msg.usage.input_tokens, msg.usage.output_tokens]
+
+
+def user_message(sources: list[dict], results: list[dict], question: str, standalone: str, history: list[dict]) -> str:
+    parts = []
+    if history:
+        parts.append(f"Conversation so far (context only):\n{format_history(history)}")
+    parts.append(f"Sources:\n\n{format_sources(sources)}{format_notes(results)}")
+    parts.append(f"Question: {question}" + (f"\n(Searched for: {standalone})" if standalone != question else ""))
+    return "\n\n".join(parts)
+
+
+def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: int = 5, articles: int = 4, history: list[dict] | None = None) -> dict:
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is not set. Export it in your shell profile and open a new terminal.")
+    history = history or []
+    client = anthropic.Anthropic()
+    standalone, rewrite_usage = rewrite_query(client, question, history, model)
+    results = searcher.search(standalone, books=books, articles=articles, per_doc=2)
+    sources = build_sources(results)
+    prompt = user_message(sources, results, question, standalone, history)
+    msg = client.messages.create(model=model, max_tokens=MAX_TOKENS, system=SYSTEM, messages=[{"role": "user", "content": prompt}])
     raw = strip_headings("".join(b.text for b in msg.content if b.type == "text"))
-    usage = [msg.usage.input_tokens, msg.usage.output_tokens]
+    usage = [msg.usage.input_tokens + rewrite_usage[0], msg.usage.output_tokens + rewrite_usage[1]]
     problems = check_quotes(raw, sources)
     if problems:  # one revision pass: fix or remove the quotations that cannot be verified
         retry = client.messages.create(
@@ -208,7 +257,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
             max_tokens=MAX_TOKENS,
             system=SYSTEM,
             messages=[
-                {"role": "user", "content": f"Sources:\n\n{format_sources(sources)}{format_notes(results)}\n\nQuestion: {question}"},
+                {"role": "user", "content": prompt},
                 {"role": "assistant", "content": raw},
                 {"role": "user", "content": "Revise your answer. These quotations cannot be verified in the passages: "
                  + "; ".join(problems) + ". Paraphrase them or quote exact continuous text from a passage (max "
@@ -222,6 +271,7 @@ def ask(question: str, searcher: Searcher, model: str = DEFAULT_MODEL, books: in
     unknown = sorted({int(n) for n in re.findall(r"S(\d+)", " ".join(TAG.findall(raw)))} - {s["n"] for s in sources})
     return {
         "question": question,
+        "standalone": standalone,
         "answer": text,
         "references": references_block(cited, suffix),
         "cited_docs": sorted({s["doc"]["id"] for s in cited}),
@@ -246,13 +296,28 @@ def render(res: dict) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("question")
+    parser.add_argument("question", nargs="?", help="omit with --chat")
     parser.add_argument("--model", default=DEFAULT_MODEL, help="Claude model id (default: Haiku 4.5)")
+    parser.add_argument("--chat", action="store_true", help="conversation in the terminal (empty line to quit)")
     args = parser.parse_args()
+    searcher = Searcher()
+    history: list[dict] = []
     try:
-        print(render(ask(args.question, Searcher(), model=args.model)))
+        while True:
+            question = args.question if args.question and not history else input("\n? ").strip()
+            if not question:
+                break
+            res = ask(question, searcher, model=args.model, history=history)
+            if res["standalone"] != question:
+                print(f"[searched for: {res['standalone']}]")
+            print(render(res))
+            history.append({"q": question, "a": res["answer"]})
+            if not args.chat:
+                break
     except RuntimeError as exc:
         sys.exit(str(exc))
+    except (EOFError, KeyboardInterrupt):
+        pass
 
 
 if __name__ == "__main__":

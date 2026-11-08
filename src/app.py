@@ -1,6 +1,6 @@
 """The CSCL Bot: the csclbot web page (Gradio).
 
-Search (src/search.py) -> Claude answer with APA citations (src/answer.py), with a per-visitor rate
+Search (src/search.py) -> Claude answer (with memory for follow-up questions) with APA citations (src/answer.py), with a per-visitor rate
 limit and a daily spend cap (src/limits.py). Claude only; no local models.
 
 Run: ANTHROPIC_API_KEY=... .venv/bin/python src/app.py      (http://127.0.0.1:7860)
@@ -11,6 +11,7 @@ CSCLBOT_DAILY_SPEND_CAP_USD, see src/limits.py.
 from __future__ import annotations
 
 import os
+import secrets
 import time
 
 import anthropic
@@ -22,6 +23,7 @@ from usage_log import country_for, log_event, visitor_id
 from search import Searcher
 
 MAX_QUESTION_CHARS = 600
+MAX_TURNS = 8  # questions per conversation
 TITLE = "The CSCL Bot"
 INTRO = """\
 Ask a question about **computer-supported collaborative learning (CSCL)**. csclbot searches
@@ -85,56 +87,83 @@ def passages_markdown(passages: list[dict]) -> str:
     return "\n\n".join(out)
 
 
-def respond(question: str, request: gr.Request) -> tuple[str, str]:
+def respond(message: str, chat: list[dict], state: dict | None, request: gr.Request) -> tuple[list[dict], dict, str, str]:
+    """One conversation turn. `state` holds the conversation id and the question/answer history of this
+    browser session (server side); `chat` is what the page shows."""
     global searcher
-    question = (question or "").strip()
+    chat = list(chat or [])
+    state = state or {"id": secrets.token_hex(4), "history": []}
+    question = (message or "").strip()
     if not question:
-        return "Please type a question.", ""
+        return chat, state, "", ""
     ip = client_ip(request)
-    who = {"country": country_for(ip, dict(request.headers) if request else {}), "visitor": visitor_id(ip), "question": question}
+    turn = len(state["history"]) + 1
+    who = {
+        "country": country_for(ip, dict(request.headers) if request else {}), "visitor": visitor_id(ip), "question": question,
+        "conversation": state["id"], "turn": turn,
+    }
+
+    def reply(text: str, passages: str = "") -> tuple[list[dict], dict, str, str]:
+        chat.extend([{"role": "user", "content": question}, {"role": "assistant", "content": text}])
+        return chat, state, passages, ""
+
+    if turn > MAX_TURNS:
+        log_event(event="blocked", note="conversation too long", **who)
+        return reply(f"This conversation has reached {MAX_TURNS} questions. Please start a new conversation with the button below.")
     if len(question) > MAX_QUESTION_CHARS:
         log_event(event="blocked", note="question too long", **who)
-        return f"Please shorten your question to {MAX_QUESTION_CHARS} characters or fewer.", ""
+        return reply(f"Please shorten your question to {MAX_QUESTION_CHARS} characters or fewer.")
     blocked = limiter.check(ip)
     if blocked:
         log_event(event="blocked", note=blocked, **who)
-        return blocked, ""
+        return reply(blocked)
     start = time.time()
     try:
         if searcher is None:
             searcher = Searcher()
-        res = ask(question, searcher)
+        res = ask(question, searcher, history=state["history"])
     except anthropic.RateLimitError as exc:
         log_event(event="error", note=f"RateLimitError: {exc}"[:300], seconds=round(time.time() - start, 1), **who)
-        return "The language model is busy right now. Please try again in a minute.", ""
+        return reply("The language model is busy right now. Please try again in a minute.")
     except (anthropic.APIError, RuntimeError) as exc:
         log_event(event="error", note=f"{type(exc).__name__}: {exc}"[:300], seconds=round(time.time() - start, 1), **who)
-        return "Sorry, the answer service is not available right now. Please try again later.", ""
+        return reply("Sorry, the answer service is not available right now. Please try again later.")
     limiter.record(res["usage"]["input"], res["usage"]["output"])
     text = f"{res['answer']}\n\n{res['references']}"
+    if res["standalone"] != question:
+        text = f"*Searched for: {res['standalone']}*\n\n{text}"
     if res["quote_problems"]:
         text += "\n\n*Note: a quotation in this answer could not be verified against the source text. Please check the source before quoting it.*"
+    state["history"].append({"q": question, "a": res["answer"]})
     log_event(
         event="answered", answer=text, retrieved_docs=res["retrieved_docs"], cited_docs=res["cited_docs"], n_passages=res["n_sources"],
         model=DEFAULT_MODEL, input_tokens=res["usage"]["input"], output_tokens=res["usage"]["output"],
         est_cost_usd=round(cost_usd(res["usage"]["input"], res["usage"]["output"]), 5), seconds=round(time.time() - start, 1),
-        quote_problems=res["quote_problems"], **who,
+        quote_problems=res["quote_problems"], searched_for=res["standalone"] if res["standalone"] != question else "", **who,
     )
-    return text, passages_markdown(res["passages_used"])
+    return reply(text, passages_markdown(res["passages_used"]))
+
+
+def new_conversation() -> tuple[list[dict], None, str, str]:
+    return [], None, "", ""
 
 
 def build_app() -> gr.Blocks:
     with gr.Blocks(title=TITLE) as demo:
         gr.Markdown(f"# {TITLE}\n\n{INTRO}")
         gr.Markdown(NOTICE)
-        question = gr.Textbox(label="Your question", lines=2, max_lines=4, placeholder="e.g. How is group cognition different from individual cognition?")
-        ask_button = gr.Button("Ask", variant="primary")
+        state = gr.State(None)
+        chat = gr.Chatbot(label="Conversation", height=480, buttons=["copy"])
+        question = gr.Textbox(label="Your question (follow-up questions are understood)", lines=2, max_lines=4, placeholder="e.g. How is group cognition different from individual cognition?")
+        with gr.Row():
+            ask_button = gr.Button("Ask", variant="primary")
+            new_button = gr.Button("New conversation")
         gr.Examples(examples=[[e] for e in EXAMPLES], inputs=question, label="Examples")
-        answer = gr.Markdown(label="Answer", container=True)
-        with gr.Accordion("Passages the answer is based on", open=False):
+        with gr.Accordion("Passages the latest answer is based on", open=False):
             passages = gr.Markdown()
         gr.Markdown(FOOTER)
-        gr.on(triggers=[ask_button.click, question.submit], fn=respond, inputs=question, outputs=[answer, passages], api_name="ask", show_progress="full")
+        gr.on(triggers=[ask_button.click, question.submit], fn=respond, inputs=[question, chat, state], outputs=[chat, state, passages, question], api_name="ask", show_progress="full")
+        new_button.click(new_conversation, outputs=[chat, state, passages, question], api_name="new")
     demo.queue(max_size=20, default_concurrency_limit=4)
     return demo
 

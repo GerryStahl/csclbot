@@ -34,7 +34,12 @@ def main() -> None:
     print(f"events: {len(df)}; answered: {len(ans)}; blocked: {(df.event == 'blocked').sum()}; errors: {(df.event == 'error').sum()}")
     print(f"visitors (anonymous ids): {df.visitor.nunique()}; estimated cost: ${ans.est_cost_usd.sum():.3f}; "
           f"mean response time: {ans.seconds.mean():.1f} s; mean tokens in/out: {ans.input_tokens.mean():.0f}/{ans.output_tokens.mean():.0f}")
-    print(f"answers with unverified quotations: {(ans.quote_problems != '').sum()}\n")
+    print(f"answers with unverified quotations: {(ans.quote_problems != '').sum()}")
+    if "conversation" in ans.columns and (ans.conversation != "").any():
+        turns = ans[ans.conversation != ""].groupby("conversation").size()
+        print(f"conversations: {len(turns)}; mean questions per conversation: {turns.mean():.1f}; "
+              f"follow-ups rewritten for search: {(ans.searched_for != '').sum()}")
+    print()
 
     by_day = df.assign(day=df.timestamp_utc.dt.date).groupby("day").agg(
         events=("event", "size"), answered=("event", lambda s: (s == "answered").sum()), visitors=("visitor", "nunique"), cost_usd=("est_cost_usd", "sum"))

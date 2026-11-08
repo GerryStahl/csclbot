@@ -37,7 +37,7 @@ export ANTHROPIC_API_KEY=...        # in your shell profile; never in the repo o
 .venv/bin/python src/app.py                          # http://127.0.0.1:7860
 ```
 
-Test sets: `src/sample_results.py` (15 questions, retrieval only → `reports/sample_results.md`) and `src/sample_answers.py` (8 questions with Claude → `reports/sample_answers.md`). Limits and prices can be overridden with `CSCLBOT_*` environment variables (see `src/limits.py`).
+Test sets: `src/sample_results.py` (15 questions, retrieval only → `reports/sample_results.md`), `src/sample_answers.py` (8 questions with Claude → `reports/sample_answers.md`) and `src/sample_conversations.py` (scripted follow-up conversations → `reports/sample_conversations.md`; `src/answer.py --chat` starts a conversation in the terminal). Limits and prices can be overridden with `CSCLBOT_*` environment variables (see `src/limits.py`).
 
 ## Hosting and usage reports
 

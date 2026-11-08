@@ -44,9 +44,12 @@ Test sets: `src/sample_results.py` (15 questions, retrieval only → `reports/sa
 The app runs on Azure Container Apps (scale to zero, one replica), built in the cloud from the [Dockerfile](Dockerfile). Deployment, resource names, DNS and update steps: [documentation/deployment.md](documentation/deployment.md). To read the cloud usage log on your machine:
 
 ```bash
-bash deploy/fetch_logs.sh                 # needs `az login`; copies usage.csv to data/logs/
-.venv/bin/python src/usage_report.py      # totals by day and country, cost, most-cited documents, latest questions
+az login                                  # only if the Azure sign-in has expired
+bash deploy/fetch_logs.sh                 # copies the live usage.csv to data/logs/
+.venv/bin/python src/usage_report.py      # summary (options: --days 30, --questions 15)
 ```
+
+**Reading the report.** `src/usage_report.py` prints, for the last 30 days: the number of events (answered, blocked by a limit, errors), anonymous visitors, estimated cost, mean response time and tokens, answers with unverified quotations, and conversations (mean questions per conversation, follow-ups rewritten for search); then totals by day and by country, the most-cited documents, and the latest questions. For the full detail open `data/logs/usage.csv` in Excel: one row per event, with the question, the answer, the cited documents, the rewritten search question, tokens, cost and timing (see the columns under "Usage log" above). Country shows `unknown` when the visitor's address is not in the GeoLite2 database and `local` for this machine. The cost is an estimate from token counts; the Anthropic console shows the actual spend.
 
 ## Reference data
 

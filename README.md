@@ -24,6 +24,58 @@ question ─► search ─► numbered passages ─► Claude answer ─► APA 
 5. **Safeguards.** Per visitor 8 questions/hour and 30/day (each turn counts); a daily spend cap ($5 by default) kept on persistent storage; questions limited to 600 characters; Claude only.
 6. **Usage log.** Every event is appended to `usage.csv` (Excel-readable): time, event, country, anonymous visitor id (a salted hash; the IP address is never stored), question, answer, retrieved and cited documents, tokens, estimated cost, seconds, unverified quotations, conversation id, turn number and the rewritten search question. Country comes from a local MaxMind GeoLite2 database.
 
+## How the search works
+
+The bot must find the right passages in two very different collections: 22 long books (Gerry's own, full text) and 470 journal articles (mostly only summaries, for copyright reasons). The design follows from that: embed several kinds of semantic objects in one space, search them by meaning *and* by words, and rank books and articles separately.
+
+### 1. Semantic objects and their embeddings
+
+Every searchable item is turned into a 768-dimension vector by one model, `intfloat/e5-base-v2` (texts are embedded with the prefix `passage: `, questions with `query: `; vectors are normalised, so cosine similarity is a dot product). A single index must use a single model, so everything below shares it. The index holds **26,465 items** in four kinds:
+
+| Semantic object | Items | Where the text comes from | What it is good for |
+|---|---|---|---|
+| **Book chunk** | 17,441 | base-level chunks (about 150 words) of the 337 chapters; vectors reused from E-Library | specific claims, arguments, definitions and examples in the books |
+| **Chapter summary** | 335 | one summary per chapter (E-Library) | questions about what a whole chapter is about |
+| **Article summary** | 463 | title plus a 50–60-word summary written once by Claude Haiku (Anniversary project) | topical questions about the 470 articles, whose text is not hosted |
+| **Article passage** | 8,226 | 150-word windows (stride 120) of the 89 open-access articles, with exact printed pages | specific claims in articles whose licence (CC BY 4.0 / CC BY-NC 2.0) allows full text |
+
+Larger E-Library chunk levels (section, chapter) exist in the old index but are not used: summaries cover the "whole chapter" level more cleanly, and overlapping levels would duplicate hits. Articles are matched in the semantic index at summary level (and at passage level when open access); their remaining text is reachable only through the keyword index below.
+
+### 2. Three rankings, one fused list
+
+For each question three rankings are computed independently (200 candidates each):
+
+1. **Dense (semantic) ranking.** The question is embedded and compared with all 26,465 vectors. This finds passages that *mean* the same thing even when the words differ ("shared understanding" ↔ "intersubjective meaning making").
+2. **Lexical ranking (BM25).** The same items are also ranked as bags of stemmed words (English stemming, stop words removed). This rewards exact terms and names that embeddings blur ("Vygotsky", "VMT", "uptake").
+3. **Page-level keyword index.** A separate BM25 index of 9,276 article pages (462 articles) records which words occur on which page, with weights only. It stores **no text**, so it can cover all articles, including those whose text may not be hosted. It repairs the weakness of summaries: a rare term such as "squibs" appears in no summary but is found on the pages that use it.
+
+**Rare-word rule.** The keyword index uses the rarest word of the question. If that word occurs in at most 60 articles it counts as *rare*: every matching article and its exact pages are listed, the two earliest matching articles are forced into the results (so "when was X first proposed?" can be answered), and the answer carries a "Search note" saying how many articles matched. For common words the keyword index only boosts the ranking and its pages are not shown.
+
+### 3. Fusion and ranking
+
+- **Reciprocal Rank Fusion (RRF).** An item's fused score is the sum over rankings of 1 / (60 + rank). Scores from the three rankings are not comparable, but ranks are, so no tuning of scales is needed. The keyword ranking has weight 1.5 (a hit on a rare word is strong evidence).
+- **Grouping by document.** Items are grouped into documents (chapters and articles). A document's score is its best item plus 0.3 × the next two items, so a document with several good passages outranks one with a single lucky hit.
+- **Books and articles ranked separately.** 17,441 book chunks would otherwise crowd out the articles. The page therefore takes the top **5 chapters** and the top **4 articles** (plus the earliest articles for rare words), with up to 2 passages per document. Each alternate version of a work (journal article ↔ book reprint) is attached to the document rather than competing with it.
+- **Page attribution.** Book chunk pages are found by matching the chunk text in the volume PDFs (the old index drifts by 1–3 pages; about 1% of chunks that cannot be matched take the previous chunk's page). For articles, printed page = first page + PDF page index (469 of 470 PDFs agree with the page count).
+
+### 4. From passages to a cited answer
+
+The selected passages are numbered S1…Sn and given to Claude with strict rules: answer only from the passages, tag every claim `[S#]`, paraphrase summaries and keyword matches, quote only from full-text passages (at most 25 words), and decline questions outside CSCL. The program, not the model, then:
+
+1. replaces each `[S#]` tag with an APA in-text citation and that passage's page(s), adding year suffixes (2026a, 2026b) where needed;
+2. verifies every quotation against the passage text, with one revision pass, and flags any that remain unverified;
+3. builds the reference list from the sources actually cited, adding every alternate version from `data/references.json` (`reprint_of`, `reprinted_in`, `originally_published_as`, `original_of`, `same_text_as`) and the licence line for open-access articles.
+
+Follow-up questions are first rewritten into standalone questions (a short Haiku call, shown as "Searched for: …") so that the three rankings above work on a complete question; the last three turns are passed to Claude as context, but citations come only from the current turn's passages.
+
+### 5. Why this design
+
+- **Meaning and words.** Embeddings handle paraphrase and concepts; BM25 and the keyword index handle names, acronyms and rare terms. Each covers the other's blind spot.
+- **Copyright by construction.** The hosted app holds Gerry's text, open-access article text with its licence, and for everything else only citation metadata, short summaries and a text-free keyword index.
+- **Citations are data, not generation.** Because references and page numbers come from the reference data and the located pages, the model cannot invent them.
+
+Code: `src/build_index.py` (items, vectors, BM25), `src/build_keyword_index.py` (page index), `src/search.py` (rankings, fusion, grouping), `src/answer.py` (prompt, citations, quote check, follow-up rewrite). `src/sample_results.py` writes `reports/sample_results.md` to inspect retrieval for 15 test questions.
+
 ## Quick start (local)
 
 ```bash

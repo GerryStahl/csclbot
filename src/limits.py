@@ -12,7 +12,7 @@ import os
 import threading
 import time
 from collections import defaultdict, deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 USAGE_FILE = Path(os.environ.get("CSCLBOT_USAGE_FILE", Path(__file__).resolve().parent.parent / "data" / "usage.json"))
@@ -35,7 +35,7 @@ class Limiter:
 
     @staticmethod
     def today() -> str:
-        return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        return datetime.now(UTC).strftime("%Y-%m-%d")
 
     def _load(self) -> dict:
         try:
@@ -43,9 +43,6 @@ class Limiter:
         except (FileNotFoundError, ValueError):
             data = {}
         return data if data.get("date") == self.today() else {"date": self.today(), "usd": 0.0, "questions": 0}
-
-    def spent_today(self) -> float:
-        return float(self._load()["usd"])
 
     def check(self, client: str, now: float | None = None) -> str | None:
         """None if the question may proceed, otherwise a message to show the visitor."""

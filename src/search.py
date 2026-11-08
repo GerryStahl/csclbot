@@ -1,9 +1,11 @@
-"""Hybrid search over the csclbot index with APA references (step 4: retrieval only, no LLM).
+"""Hybrid search over the csclbot index with APA references (retrieval only, no LLM).
 
-Dense (e5-base-v2) and BM25 rankings over all items are merged by reciprocal rank fusion, then
-grouped by document. Each result gives the in-text citation with page(s), the APA reference, short
-snippets, and every linked reference (the journal article and its book-chapter reprint, the original
-publication), because different users may have access to different sources.
+Three rankings are merged by reciprocal rank fusion: dense (e5-base-v2 embeddings) and BM25 over all
+index items, plus a page-level keyword index of the journal articles (rare words such as "squibs").
+Items are grouped by document and returned as book chapters and journal articles, each with the in-text
+citation with page(s), the APA reference, short snippets, and every linked reference (the journal article
+and its book-chapter reprint, the original publication), because different users may have access to
+different sources. See README.md ("How the search works").
 
 Run: .venv/bin/python src/search.py "How does group cognition differ from individual cognition?" [-b 5] [-a 4]
 """

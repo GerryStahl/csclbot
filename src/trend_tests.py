@@ -76,8 +76,11 @@ def embedding_drift(df: pd.DataFrame) -> pd.Series:
     emb = model.encode(df.summary_haiku.tolist(), normalize_embeddings=True)
     centroids = {y: emb[(df.year == y).to_numpy()].mean(axis=0) for y in YEARS}
     base = centroids[2006]
-    cos = lambda a, b: float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
-    return pd.Series({y: 1 - cos(c, base) for y, c in centroids.items()})
+
+    def cosine(a: np.ndarray, b: np.ndarray) -> float:
+        return float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
+
+    return pd.Series({y: 1 - cosine(c, base) for y, c in centroids.items()})
 
 
 def main() -> None:

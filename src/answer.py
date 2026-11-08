@@ -1,10 +1,11 @@
-"""Answer a question with Claude, grounded in the retrieved passages, with APA citations (step 5).
+"""Answer a question with Claude, grounded in the retrieved passages, with APA citations.
 
 Pipeline: search (src/search.py) -> numbered sources [S1]... -> Claude answers using only those
 sources and tags claims with [S#] -> the program replaces each tag by the source's in-text citation
 (e.g. "(Stahl, 2026, p. 245)") and appends full APA references for the sources actually cited,
 together with alternative sources (journal version / book reprint / original publication).
-Journal articles are represented only by their short summaries, so they are paraphrased, not quoted.
+Article summaries and keyword matches are paraphrased, never quoted; passages of book chapters and of
+open-access articles can be quoted briefly, and every quotation is checked against the passages.
 
 Follow-up questions: ask(..., history=[{"q": ..., "a": ...}]) first rewrites the question into a standalone
 one (a short Haiku call) so the search understands "that" or "the second one", then answers with the last turns
@@ -160,7 +161,8 @@ def references_block(cited: list[dict], suffix: dict[str, str]) -> str:
     for d in docs.values():
         ref = d["reference"]
         if d["id"] in suffix:
-            ref = re.sub(r"\((\d{4})\)", lambda m: f"({m.group(1)}{suffix[d['id']]})", ref, count=1)
+            letter = suffix[d["id"]]
+            ref = re.sub(r"\((\d{4})\)", lambda m, letter=letter: f"({m.group(1)}{letter})", ref, count=1)
         entries.append((ref, d))
     lines = ["**References**", ""]
     for ref, d in sorted(entries, key=lambda e: e[0]):

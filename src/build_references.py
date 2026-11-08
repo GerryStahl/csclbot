@@ -329,10 +329,8 @@ def build_elibrary(cache: dict, pages: dict, ijcscl_docs: list[dict]) -> tuple[l
             if match:
                 doc["related"].append({"relation": "reprint_of", "id": match["id"]})
                 match["related"].append({"relation": "reprinted_in", "id": doc_id})
-                if parsed and parsed.get("parse_ok"):
-                    fam = lambda people: {norm_key(a.get("family", "")) for a in people}
-                    if fam(parsed["authors"]) != fam(match["authors"]):
-                        doc["issues"].append("chapter_reference authors differ from the matched article's (recorded reference may be a different version)")
+                if parsed and parsed.get("parse_ok") and family_keys(parsed["authors"]) != family_keys(match["authors"]):
+                    doc["issues"].append("chapter_reference authors differ from the matched article's (recorded reference may be a different version)")
                 if parsed and parsed.get("doi") and match.get("doi") and parsed["doi"].lower() != match["doi"].lower():
                     doc["issues"].append(f"chapter_reference DOI {parsed['doi']} differs from the matched article's DOI {match['doi']}")
                 continue
@@ -362,6 +360,10 @@ def link_repeated_chapters(docs: list[dict]) -> None:
         if len(key) >= 25 and len({m["corpus"]["book_number"] for m in members}) > 1:
             for m in members:
                 m["related"] += [{"relation": "same_text_as", "id": o["id"]} for o in members if o is not m]
+
+
+def family_keys(people: list[dict]) -> set[str]:
+    return {norm_key(a.get("family", "")) for a in people}
 
 
 def is_same_book_self_publication(parsed: dict, meta: dict) -> bool:
@@ -424,9 +426,6 @@ def original_item(chapter_id: str, parsed: dict, bn: int, cn: int, raw_only: boo
 
 
 # ------------------------------------------------------------------ output
-GROUPS = [("ijcscl:", "ijCSCL article"), ("elibrary:", "e-library chapter")]
-
-
 def finish(doc: dict) -> dict:
     doc["apa"] = plain(doc["apa_md"])
     doc["cite_short"] = cite_short(doc["authors"], doc["year"])

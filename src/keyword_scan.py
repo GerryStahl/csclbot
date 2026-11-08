@@ -55,15 +55,12 @@ def show_contexts(store: dict, have: pd.DataFrame, per_term: int = 8) -> None:
     """Console only: a few 12-word snippets per term to check that hits mean what we think (not saved)."""
     for name in ("pandemic", "climate_strict", "sustainability", "social_media"):
         print(f"\n--- {name} ---")
-        shown = 0
-        for _, r in have[have[name] > 0].sort_values(name, ascending=False).iterrows():
+        hits = have[have[name] > 0].sort_values(name, ascending=False).head(per_term)
+        for _, r in hits.iterrows():
             body, _ = body_text(getattr(store[r["id"]], "fulltext", "") or "")
             m = re.search(TERMS[name], body, re.I)
             words = body[max(0, m.start() - 70) : m.end() + 70].split()
             print(f"{r['year']} [{r[name]}x] ...{' '.join(words[1:-1])}...")
-            shown += 1
-            if shown >= per_term:
-                break
 
 
 def main() -> None:

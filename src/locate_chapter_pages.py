@@ -57,7 +57,7 @@ def choose_starts(chapters: list[dict], cands: list[list[int]]) -> list[tuple[in
             pick = ok[0] if ok else (cands[0][-1] if cands[0] else None)
             starts.append((pick, "matched" if pick else "unknown"))
             continue
-        prev, prev_method = starts[-1]
+        prev = starts[-1][0]
         prev_n = chapters[k - 1]["chapter_number_of_pages"] or 1
         expected = prev + prev_n if prev else None
         # Skipping ahead is allowed (books omit some chapters); going back is not (TOC hits).

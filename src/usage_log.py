@@ -17,7 +17,7 @@ import ipaddress
 import os
 import secrets
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -94,7 +94,7 @@ def _upgrade_header() -> None:
 def log_event(**fields) -> None:
     """Append one row; unknown fields are ignored, missing ones left blank."""
     row = {c: fields.get(c, "") for c in COLUMNS}
-    row["timestamp_utc"] = row["timestamp_utc"] or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    row["timestamp_utc"] = row["timestamp_utc"] or datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     for key in ("retrieved_docs", "cited_docs", "quote_problems"):
         if isinstance(row[key], (list, tuple)):
             row[key] = "; ".join(map(str, row[key]))

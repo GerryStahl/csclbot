@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# DRAFT, NOT RUN. Deploys The CSCL Bot to Azure Container Apps. Nothing here has been executed yet;
+# DRAFT, NOT RUN. Deploys CSCLbot to Azure Container Apps. Nothing here has been executed yet;
 # review documentation/deployment.md first, and fill the variables below. Commands were written
 # from memory of the az CLI and will be checked step by step on the first real run.
 #

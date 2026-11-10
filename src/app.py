@@ -1,4 +1,4 @@
-"""The CSCL Bot: the csclbot web page (Gradio).
+"""CSCLbot: the web page (Gradio).
 
 Search (src/search.py) -> Claude answer (with memory for follow-up questions) with APA citations (src/answer.py), with a per-visitor rate
 limit and a daily spend cap (src/limits.py). Claude only; no local models.
@@ -24,15 +24,16 @@ from search import Searcher
 
 MAX_QUESTION_CHARS = 600
 MAX_TURNS = 8  # questions per conversation
-TITLE = "The CSCL Bot"
+TITLE = "CSCLbot"
 INTRO = """\
-Ask a question about **computer-supported collaborative learning (CSCL)**. csclbot searches
+Ask a question about **computer-supported collaborative learning (CSCL)**. CSCLbot searches
 Gerry Stahl's 22 e-library volumes and the articles of the *International Journal of
 Computer-Supported Collaborative Learning* (ijCSCL, 2006–2025), then writes a short answer that cites its
 sources in APA style, with page numbers.
-
+"""
+LICENCE_NOTE = """\
 *Book passages are quoted from the e-library. About a fifth of the ijCSCL articles are open access under Creative
-Commons licences (CC BY 4.0 or CC BY-NC 2.0); csclbot uses passages from their full text, cites their exact pages
+Commons licences (CC BY 4.0 or CC BY-NC 2.0); CSCLbot uses passages from their full text, cites their exact pages
 and shows the licence with the reference. For the other articles it holds only citation data, short summaries
 and an index of which words occur on which pages (no article text), so they are paraphrased from their
 summaries. The bot is for non-commercial research use.*
@@ -46,7 +47,7 @@ EXAMPLES = [
     "What is the difference between tacit and explicit understanding in software design?",
 ]
 NOTICE = """\
-**CSCL Bot is a research prototype that tests this form of support for knowledge building. Usage information is \
+**CSCLbot is a research prototype that tests this form of support for knowledge building. Usage information is \
 stored, including questions and answers. The interface may change and additional references may be added over \
 time. More CSCL resources are available at [https://gerrystahl.net](https://gerrystahl.net) and they can be \
 searched through a local Google search at the bottom of that webpage.**
@@ -151,7 +152,6 @@ def new_conversation() -> tuple[list[dict], None, str, str]:
 def build_app() -> gr.Blocks:
     with gr.Blocks(title=TITLE) as demo:
         gr.Markdown(f"# {TITLE}\n\n{INTRO}")
-        gr.Markdown(NOTICE)
         state = gr.State(None)
         chat = gr.Chatbot(label="Conversation", height=480, buttons=["copy"])
         question = gr.Textbox(label="Your question (follow-up questions are understood)", lines=2, max_lines=4, placeholder="e.g. How is group cognition different from individual cognition?")
@@ -161,6 +161,8 @@ def build_app() -> gr.Blocks:
         gr.Examples(examples=[[e] for e in EXAMPLES], inputs=question, label="Examples")
         with gr.Accordion("Passages the latest answer is based on", open=False):
             passages = gr.Markdown()
+        gr.Markdown(LICENCE_NOTE)
+        gr.Markdown(NOTICE)
         gr.Markdown(FOOTER)
         gr.on(triggers=[ask_button.click, question.submit], fn=respond, inputs=[question, chat, state], outputs=[chat, state, passages, question], api_name="ask", show_progress="full")
         new_button.click(new_conversation, outputs=[chat, state, passages, question], api_name="new")

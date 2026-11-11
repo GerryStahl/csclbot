@@ -1,0 +1,10 @@
+label,articles,share_2006_2015,share_2016_2019,share_2020_2023,share_2024_2025,spearman_rho,spearman_p,kendall_p,theil_sen_pp_per_year,era_permutation_p,kendall_q,era_q
+method: statistical/experimental (primary),96,27.3,24.6,25.0,21.9,-0.16,0.509,0.454,-0.23,0.905,0.817,0.905
+method: interpretive interaction/ethnographic/discourse (primary),136,37.1,37.7,28.9,50.0,0.02,0.942,0.82,0.1,0.22,0.82,0.66
+method: computational (primary),36,9.3,4.3,17.1,6.2,0.24,0.313,0.327,0.16,0.053,0.817,0.328
+method: mixed methods (primary),18,2.6,4.3,9.2,9.4,0.63,0.003,0.005,0.42,0.073,0.045,0.328
+method: any statistical/experimental (primary or secondary),156,43.3,40.6,44.7,31.2,-0.04,0.853,0.77,-0.13,0.584,0.82,0.882
+method: any interpretive (primary or secondary),229,60.3,63.8,59.2,71.9,0.1,0.667,0.672,0.07,0.588,0.82,0.882
+theory: socio-cognitive/information processing (primary),36,10.8,10.1,7.9,6.2,-0.12,0.603,0.448,-0.25,0.791,0.817,0.905
+theory: socio-cultural family (primary),257,71.6,66.7,63.2,75.0,-0.17,0.465,0.415,-0.19,0.463,0.817,0.882
+unit: individual learner (primary),26,7.2,7.2,7.9,3.1,-0.04,0.868,0.766,-0.0,0.847,0.82,0.905

@@ -44,6 +44,10 @@ Eras: Stahl and Hesse 2006–2015 (194 articles), Ludvigsen 2016–2019 (69), Ro
 
 The pandemic is mentioned in no article before 2020 and in 5 of the 54 articles of 2020–2022. Keyword counts do not show how a term is used; eight sampled contexts per term were read (pandemic hits were data-collection settings, climate hits examples of discussion topics). The earlier counts from the 50–60-word summaries (0 pandemic, 4 climate, 4 social media) understated every term.
 
+## Quantitative vs qualitative (post-hoc)
+
+`src/quant_qual.py` asks whether the traditional divide (statistical/experimental and socio-cognitive vs interpretive and socio-cultural) trended. The coding has no single quantitative/qualitative label, so nine composites are built from existing codes (statistical/experimental, interpretive, computational and mixed methods as primary method; "any" statistical or interpretive including secondary codes; socio-cognitive vs socio-cultural-family primary theory; individual learner as unit) and tested as in the main analysis (yearly Spearman and Mann-Kendall with Theil-Sen slope, era chi-square by permutation, BH over the nine). Output: `reports/quant_qual_trends.csv`. Result: no trend in any composite except a rise of mixed methods (2.6% in 2006-2015 to about 9% in 2020-2025; Mann-Kendall q = .045 over the nine composites, but q = .086 over all 69 labels, and the era test is n.s.). The composites were defined after seeing the data and are interpretive, so this is exploratory.
+
 ## Cluster labels
 
 The cluster numbers are arbitrary K-means ids; the names were interpreted by Gerry from titles and summaries: 0 collaborative knowledge building and assessment; 1 teacher support and orchestration; 2 collaboration scripts and learner regulation; 3 online discourse and argumentation; 4 CSCL field and foundations; 5 embodied and immersive collaboration; 6 collaborative mathematics learning.
@@ -59,6 +63,7 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt -r requirements-paper.txt
 .venv/bin/python src/trend_tests.py         # also prints the embedding drift
 .venv/bin/python src/era_comparison.py      # tables and Figure 1
+.venv/bin/python src/quant_qual.py          # quantitative vs qualitative composites
 ```
 
 Both scripts read only `data/inputs/`. Pass `--include-notices` to `trend_tests.py` to reproduce the original 376-row analysis for comparison. The reference pipeline needs the sibling `../elibrary` project and network access for Crossref; its output is committed.

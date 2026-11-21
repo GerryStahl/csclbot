@@ -4,9 +4,9 @@
 
 CSCLbot answers questions about computer-supported collaborative learning (CSCL). It searches Gerry Stahl's 22 e-library volumes (337 chapters) and the *International Journal of Computer-Supported Collaborative Learning* (ijCSCL, 2006–2025), then writes a short answer with APA citations, page numbers and full references. Where the same work exists in several places (a journal article and its book-chapter reprint, or a chapter's original publication) every reference is shown, so users can pick a source they can access.
 
-It is a research prototype. The page tells visitors that usage, questions and answers are stored.
+CSCLbot is designed to support the work of CSCL researchers. It is a preliminary research prototype for a CSCL environment where researchers could collaboratively explore and analyze existing publications. The page tells visitors that usage, questions and answers are logged to inform the developers about usage.
 
-The repository also holds the data and analyses behind Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL Through Evolving Times".
+The repository also holds the data and analyses of all the journal articles from 2006-2025. This analysis is presented in Gerry Stahl's paper for the 20th anniversary of ijCSCL, "ijCSCL In Evolving Times".
 
 ## How it works
 
